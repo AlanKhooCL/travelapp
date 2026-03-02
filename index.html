@@ -140,18 +140,7 @@
                     events: [
                         { time: "1:55 PM", desc: "Depart Singapore <span class=\"block text-sm font-normal text-slate-500 mt-1\">Ensure you have your Visit Japan Web QR codes ready for swift immigration.</span>", icon: "plane-takeoff", expense: 0 },
                         { time: "9:55 PM", desc: "Arrive at Tokyo Haneda Airport <span class=\"block text-sm font-normal text-slate-500 mt-1\">Navigate to the Tokyo Monorail or Keikyu Line for transit into the city.</span>", icon: "plane-landing", link: "https://www.google.com/maps/search/?api=1&query=Haneda+Airport", latlng: [35.5494, 139.7798], expense: 0 },
-                        { time: "11:00 PM", desc: "Check-in: Dai-ichi Hotel Tokyo (Shimbashi) <span class=\"block text-sm font-normal text-slate-500 mt-1\">Excellent base location with direct connections to the Yamanote Line.</span>", icon: "bed-double", link: "https://www.agoda.com/dai-ichi-hotel-tokyo/hotel/tokyo-jp.html", latlng: [35.6656, 139.7581], expense: 0 },
-                        { 
-                            time: "11:30 PM", 
-                            desc: "Late-Night Shimbashi Eats <span class=\"block text-sm font-normal text-slate-500 mt-1\">If you're hungry after dropping your bags, Shimbashi is famous for late-night izakayas. Here are a few hidden gems within walking distance:</span>", 
-                            icon: "utensils", 
-                            latlng: [35.6660, 139.7580], 
-                            expense: 0,
-                            subLinks: [
-                                { name: "Uoshin Shimbashi (Incredible, bustling seafood izakaya open late)", link: "https://maps.app.goo.gl/gX5D7XqW2N8W2N8W2" },
-                                { name: "Kagari Echika (Michelin Bib Gourmand creamy chicken paitan ramen)", link: "https://maps.app.goo.gl/hY6E8YqW2N8W2N8W2" }
-                            ]
-                        }
+                        { time: "11:00 PM", desc: "Check-in: Dai-ichi Hotel Tokyo (Shimbashi) <span class=\"block text-sm font-normal text-slate-500 mt-1\">Excellent base location with direct connections to the Yamanote Line.</span>", icon: "bed-double", link: "https://www.agoda.com/dai-ichi-hotel-tokyo/hotel/tokyo-jp.html", latlng: [35.6656, 139.7581], expense: 0 }
                     ]
                 },
                 {
@@ -176,7 +165,18 @@
                             ]
                         },
                         { time: "5:30 PM", desc: "Daruma Doll Painting <span class=\"block text-sm font-normal text-slate-500 mt-1\">Paint a traditional Japanese talisman of good luck and perseverance. Don't forget to set an intention when painting the first eye!</span>", icon: "hammer", link: "https://www.klook.com/en-SG/activity/176779-tokyo-create-your-own-daruma-experience/", latlng: [35.6595, 139.7004], expense: 0 },
-                        { time: "7:00 PM", desc: "<mark class=\"bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md font-bold shadow-sm border border-pink-200\">Dinner @ Ginza</mark> <span class=\"block text-sm font-normal text-slate-500 mt-1\">Stroll through Tokyo's premier upscale dining and shopping district.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Ginza+Tokyo+Restaurants", latlng: [35.6717, 139.7649], expense: 0 },
+                        { 
+                            time: "7:00 PM", 
+                            desc: "<mark class=\"bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md font-bold shadow-sm border border-pink-200\">Dinner @ Ginza</mark> <span class=\"block text-sm font-normal text-slate-500 mt-1\">Check out these tucked-away local favorites instead of the usual tourist traps:</span>", 
+                            icon: "utensils", 
+                            link: "https://www.google.com/maps/search/?api=1&query=Ginza+Tokyo+Restaurants", 
+                            latlng: [35.6717, 139.7649], 
+                            expense: 0,
+                            subLinks: [
+                                { name: "Mugi to Olive (Michelin-recognized clam broth ramen)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara6" },
+                                { name: "Sato Yosuke (Silky, traditional Inaniwa udon in a refined setting)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara7" }
+                            ]
+                        },
                         { time: "9:00 PM", desc: "Return to Hotel", icon: "bed-double", expense: 0 }
                     ]
                 },
@@ -188,7 +188,17 @@
                         { time: "2:00 PM", desc: "Late Lunch @ Bills Cafe Shichirigahama <span class=\"block text-sm font-normal text-slate-500 mt-1\">Famous for ricotta hotcakes with sweeping views of the Pacific Ocean.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Bills+Cafe+Shichirigahama", latlng: [35.3065, 139.5109], expense: 0 },
                         { time: "4:00 PM", desc: "Shichirigahama Beach & Koshigoe Park <span class=\"block text-sm font-normal text-slate-500 mt-1\">Relax on the black sand beach. On clear days, you can spot Mount Fuji on the horizon.</span>", icon: "sunset", link: "https://www.google.com/maps/search/?api=1&query=Shichirigahama+Beach", latlng: [35.3048, 139.5064], expense: 0 },
                         { time: "5:00 PM", desc: "Hatoya Kamakura <span class=\"block text-sm font-normal text-slate-500 mt-1\">A quick stop for artisanal matcha and rich, creamy ice cream.</span>", icon: "utensils", link: "https://maps.app.goo.gl/aPSCzpM1YoUwoRPQ7", latlng: [35.3190, 139.5502], expense: 0 },
-                        { time: "6:00 PM", desc: "<mark class=\"bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md font-bold shadow-sm border border-pink-200\">Dinner @ Tokyo Station</mark> <span class=\"block text-sm font-normal text-slate-500 mt-1\">Explore 'Ramen Street' or pick up an intricate Ekiben (train bento) before heading back.</span>", icon: "utensils", latlng: [35.6812, 139.7671], expense: 0 }
+                        { 
+                            time: "6:00 PM", 
+                            desc: "<mark class=\"bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md font-bold shadow-sm border border-pink-200\">Dinner @ Tokyo Station</mark> <span class=\"block text-sm font-normal text-slate-500 mt-1\">Instead of a standard bento, try these amazing station highlights:</span>", 
+                            icon: "utensils", 
+                            latlng: [35.6812, 139.7671], 
+                            expense: 0,
+                            subLinks: [
+                                { name: "Rokurinsha (Legendary rich tsukemen in Ramen Street)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara8" },
+                                { name: "Toyama Shiroebitei (Rare white shrimp bowls hidden in First Avenue)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara9" }
+                            ]
+                        }
                     ]
                 },
                 {
@@ -256,18 +266,7 @@
                         { time: "3:30 PM", desc: "Check-in: Mercure Hongdae <span class=\"block text-sm font-normal text-slate-500 mt-1\">Located in the heart of Seoul's youthful, indie music, and arts district.</span>", icon: "bed-double", link: "https://www.google.com/maps/search/?api=1&query=Mercure+Ambassador+Seoul+Hongdae", latlng: [37.5563, 126.9220], expense: 0 },
                         { time: "4:00 PM", desc: "Hangang Ramyeon @ Yeouinaru <span class=\"block text-sm font-normal text-slate-500 mt-1\">A classic Seoul experience: cooking instant noodles using automated machines by the Han River.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Yeouinaru+Station+Hangang+Park", latlng: [37.5268, 126.9327], expense: 0 },
                         { time: "5:30 PM", desc: "Sinchon Robinhood Archery Cafe <span class=\"block text-sm font-normal text-slate-500 mt-1\">Try your hand at indoor archery with coaching provided by the staff.</span>", icon: "map-pin", link: "https://www.google.com/maps/search/?api=1&query=Robin+Hood+Archery+Cafe+Sinchon", latlng: [37.5579, 126.9368], expense: 0 },
-                        { 
-                            time: "7:00 PM", 
-                            desc: "Dinner @ Hongdae <span class=\"block text-sm font-normal text-slate-500 mt-1\">Endless options in this lively university area. Try these hidden gems for an authentic local meal:</span>", 
-                            icon: "shopping-bag", 
-                            link: "https://www.google.com/maps/search/?api=1&query=Hongdae+Seoul", 
-                            latlng: [37.5563, 126.9237], 
-                            expense: 0,
-                            subLinks: [
-                                { name: "Choigozip Hongdae (Top-tier Korean BBQ with a great atmosphere)", link: "https://maps.app.goo.gl/kZ8E8ZqW2N8W2N8W2" },
-                                { name: "Gwangalli Hongdae (Incredible raw seafood & late-night vibes)", link: "https://maps.app.goo.gl/jX7E8ZqW2N8W2N8W2" }
-                            ]
-                        },
+                        { time: "7:00 PM", desc: "Dinner @ Sinchon/Hongdae <span class=\"block text-sm font-normal text-slate-500 mt-1\">Endless options for Korean fried chicken, dakgalbi, or KBBQ in this lively university area.</span>", icon: "shopping-bag", link: "https://www.google.com/maps/search/?api=1&query=Hongdae+Seoul", latlng: [37.5563, 126.9237], expense: 0 },
                         { time: "9:00 PM", desc: "Return to Hotel", icon: "bed-double", expense: 0 }
                     ]
                 },
