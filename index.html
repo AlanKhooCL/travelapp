@@ -37,168 +37,216 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        button {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #4338CA; }
+        button.secondary { background-color: #6B7280; margin-bottom: 20px; width: auto; padding: 10px 20px;}
         ul { list-style-type: none; padding: 0; }
-        li {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-        }
+        li { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
         li:last-child { border-bottom: none; }
+        .trip-item { cursor: pointer; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; transition: 0.2s;}
+        .trip-item:hover { border-color: var(--primary); }
         .positive { color: #059669; font-weight: bold; }
         .negative { color: #DC2626; font-weight: bold; }
+        
+        /* View Toggling */
+        .view { display: none; }
+        .active-view { display: block; }
     </style>
 </head>
 <body>
 
     <h1>✈️ TripSplit</h1>
 
-    <div class="card">
-        <h2>1. Add Trip Members</h2>
-        <form id="addUserForm">
-            <input type="text" id="userName" placeholder="Enter name (e.g., Alice)" required>
-            <button type="submit">Add Member</button>
-        </form>
-        <ul id="userList"></ul>
+    <div id="dashboardView" class="view active-view">
+        <div class="card">
+            <h2>Create New Trip</h2>
+            <form id="newTripForm">
+                <input type="text" id="tripName" placeholder="Trip Name (e.g., Bali 2026)" required>
+                <button type="submit">Start Trip</button>
+            </form>
+        </div>
+        <h2>Your Trips</h2>
+        <div id="tripList"></div>
     </div>
 
-    <div class="card">
-        <h2>2. Add an Expense</h2>
-        <form id="addExpenseForm">
-            <input type="text" id="expenseDesc" placeholder="What was it for? (e.g., Dinner)" required>
-            <input type="number" id="expenseAmount" placeholder="Total Amount ($)" step="0.01" required>
-            <select id="expensePayer" required>
-                <option value="" disabled selected>Who paid?</option>
-            </select>
-            <button type="submit">Record Expense</button>
-        </form>
-    </div>
+    <div id="tripView" class="view">
+        <button class="secondary" onclick="goBackToDashboard()">← Back to Trips</button>
+        <h2 id="currentTripTitle" style="margin-top: 0;">Trip Details</h2>
 
-    <div class="card">
-        <h2>3. Who Owes Whom?</h2>
-        <ul id="settlementList">
-            <li><em>Add members and expenses to see balances.</em></li>
-        </ul>
+        <div class="card">
+            <h2>1. Members</h2>
+            <form id="addUserForm">
+                <input type="text" id="userName" placeholder="Enter name" required>
+                <button type="submit">Add Member</button>
+            </form>
+            <ul id="userList"></ul>
+        </div>
+
+        <div class="card">
+            <h2>2. Add Expense</h2>
+            <form id="addExpenseForm">
+                <input type="text" id="expenseDesc" placeholder="What was it for?" required>
+                <input type="number" id="expenseAmount" placeholder="Amount ($)" step="0.01" required>
+                <select id="expensePayer" required></select>
+                <button type="submit">Record Expense</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>3. Balances</h2>
+            <ul id="settlementList"></ul>
+        </div>
     </div>
 
     <script>
-        // State Management
-        let users = [];
-        let expenses = [];
+        // --- STATE MANAGEMENT ---
+        // Load trips from localStorage or start empty
+        let trips = JSON.parse(localStorage.getItem('tripSplitData')) || [];
+        let activeTripId = null;
 
-        // DOM Elements
-        const userForm = document.getElementById('addUserForm');
-        const expenseForm = document.getElementById('addExpenseForm');
+        // --- DOM ELEMENTS ---
+        const dashboardView = document.getElementById('dashboardView');
+        const tripView = document.getElementById('tripView');
+        const tripList = document.getElementById('tripList');
+        const currentTripTitle = document.getElementById('currentTripTitle');
         const userList = document.getElementById('userList');
         const expensePayerSelect = document.getElementById('expensePayer');
         const settlementList = document.getElementById('settlementList');
 
-        // Add User Logic
-        userForm.addEventListener('submit', function(e) {
+        // --- CORE FUNCTIONS ---
+        function saveData() {
+            localStorage.setItem('tripSplitData', JSON.stringify(trips));
+        }
+
+        function renderDashboard() {
+            tripList.innerHTML = '';
+            if (trips.length === 0) {
+                tripList.innerHTML = '<p style="text-align:center; color:#6B7280;">No trips yet. Create one above!</p>';
+                return;
+            }
+
+            trips.forEach(trip => {
+                const div = document.createElement('div');
+                div.className = 'trip-item';
+                div.innerHTML = `<strong>${trip.name}</strong> <br><small>${trip.users.length} members • ${trip.expenses.length} expenses</small>`;
+                div.onclick = () => openTrip(trip.id);
+                tripList.appendChild(div);
+            });
+        }
+
+        // --- EVENT LISTENERS: DASHBOARD ---
+        document.getElementById('newTripForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('tripName');
+            const newTrip = {
+                id: Date.now().toString(), // Unique ID based on timestamp
+                name: nameInput.value.trim(),
+                users: [],
+                expenses: []
+            };
+            trips.push(newTrip);
+            saveData();
+            nameInput.value = '';
+            openTrip(newTrip.id);
+        });
+
+        // --- NAVIGATION ---
+        function openTrip(id) {
+            activeTripId = id;
+            dashboardView.classList.remove('active-view');
+            tripView.classList.add('active-view');
+            renderTripDetails();
+        }
+
+        function goBackToDashboard() {
+            activeTripId = null;
+            tripView.classList.remove('active-view');
+            dashboardView.classList.add('active-view');
+            renderDashboard();
+        }
+
+        // --- EVENT LISTENERS: ACTIVE TRIP ---
+        function getActiveTrip() {
+            return trips.find(t => t.id === activeTripId);
+        }
+
+        document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('userName');
             const name = nameInput.value.trim();
+            const trip = getActiveTrip();
             
-            if (name && !users.includes(name)) {
-                users.push(name);
-                updateUserUI();
-                calculateBalances();
+            if (name && !trip.users.includes(name)) {
+                trip.users.push(name);
+                saveData();
+                renderTripDetails();
                 nameInput.value = '';
             }
         });
 
-        // Add Expense Logic
-        expenseForm.addEventListener('submit', function(e) {
+        document.getElementById('addExpenseForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            if (users.length === 0) {
-                alert("Please add members to the trip first!");
-                return;
-            }
+            const trip = getActiveTrip();
+            if (trip.users.length === 0) return alert("Add members first!");
 
-            const desc = document.getElementById('expenseDesc').value;
-            const amount = parseFloat(document.getElementById('expenseAmount').value);
-            const payer = document.getElementById('expensePayer').value;
+            const expense = {
+                desc: document.getElementById('expenseDesc').value,
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                payer: document.getElementById('expensePayer').value
+            };
 
-            expenses.push({ desc, amount, payer });
-            calculateBalances();
+            trip.expenses.push(expense);
+            saveData();
+            renderTripDetails();
             
-            document.getElementById('expenseDesc').value = '';
-            document.getElementById('expenseAmount').value = '';
-            document.getElementById('expensePayer').value = '';
+            e.target.reset(); // Clear form
         });
 
-        // Update User List & Dropdown
-        function updateUserUI() {
+        // --- RENDER TRIP UI & CALCULATE BALANCES ---
+        function renderTripDetails() {
+            const trip = getActiveTrip();
+            if (!trip) return;
+
+            currentTripTitle.textContent = trip.name;
             userList.innerHTML = '';
             expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
             
-            users.forEach(user => {
-                // Update List
-                const li = document.createElement('li');
-                li.textContent = user;
-                userList.appendChild(li);
-
-                // Update Dropdown
-                const option = document.createElement('option');
-                option.value = user;
-                option.textContent = user;
-                expensePayerSelect.appendChild(option);
+            // 1. Render Users & Dropdown
+            trip.users.forEach(user => {
+                userList.innerHTML += `<li>${user}</li>`;
+                expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
             });
-        }
 
-        // The Core Logic: Calculate Balances
-        function calculateBalances() {
-            if (users.length === 0) return;
-
-            // Step 1: Initialize balances to 0
+            // 2. Calculate Net Balances
             let balances = {};
-            users.forEach(user => balances[user] = 0);
+            trip.users.forEach(u => balances[u] = 0);
 
-            // Step 2: Calculate net balances based on expenses
-            expenses.forEach(exp => {
-                const splitAmount = exp.amount / users.length;
-                
-                // The payer gets credited the full amount
+            trip.expenses.forEach(exp => {
+                const split = exp.amount / trip.users.length;
                 balances[exp.payer] += exp.amount;
-                
-                // Everyone (including the payer) gets debited their split share
-                users.forEach(user => {
-                    balances[user] -= splitAmount;
-                });
+                trip.users.forEach(u => balances[u] -= split);
             });
 
-            // Step 3: Render the balances to the UI
+            // 3. Render Balances
             settlementList.innerHTML = '';
-            let isSettled = true;
+            let settled = true;
 
             for (const [user, balance] of Object.entries(balances)) {
-                if (Math.abs(balance) > 0.01) { // Ignoring tiny rounding errors
-                    isSettled = false;
+                if (Math.abs(balance) > 0.01) {
+                    settled = false;
                     const li = document.createElement('li');
-                    
-                    if (balance > 0) {
-                        li.innerHTML = `<span>${user}</span> <span class="positive">gets back $${balance.toFixed(2)}</span>`;
-                    } else {
-                        li.innerHTML = `<span>${user}</span> <span class="negative">owes $${Math.abs(balance).toFixed(2)}</span>`;
-                    }
+                    if (balance > 0) li.innerHTML = `<span>${user}</span> <span class="positive">gets $${balance.toFixed(2)}</span>`;
+                    else li.innerHTML = `<span>${user}</span> <span class="negative">owes $${Math.abs(balance).toFixed(2)}</span>`;
                     settlementList.appendChild(li);
                 }
             }
 
-            if (isSettled && expenses.length > 0) {
-                settlementList.innerHTML = '<li><em>Everyone is settled up!</em></li>';
-            } else if (expenses.length === 0 && users.length > 0) {
-                 settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
-            }
+            if (settled && trip.expenses.length > 0) settlementList.innerHTML = '<li><em>All settled!</em></li>';
+            else if (trip.expenses.length === 0 && trip.users.length > 0) settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
         }
+
+        // Initialize App
+        renderDashboard();
     </script>
 </body>
 </html>
