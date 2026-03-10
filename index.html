@@ -11,44 +11,30 @@
             --card-bg: #FFFFFF;
             --text: #111827;
             --border: #E5E7EB;
+            --danger: #DC2626;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); max-width: 600px; margin: 0 auto; padding: 20px; }
         h1, h2 { text-align: center; }
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        input[type="text"], input[type="number"], select, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
         button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #4338CA; }
-        button.secondary { background-color: #6B7280; margin-bottom: 20px; width: auto; padding: 10px 20px;}
+        button.secondary { background-color: #6B7280; margin-bottom: 20px; width: auto; padding: 10px 20px; }
+        button.danger { background-color: var(--danger); width: auto; padding: 5px 10px; margin-left: 5px;}
+        button.edit-btn { background-color: #F59E0B; width: auto; padding: 5px 10px; }
         ul { list-style-type: none; padding: 0; }
         li { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
         li:last-child { border-bottom: none; }
         .trip-item { cursor: pointer; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; transition: 0.2s;}
         .trip-item:hover { border-color: var(--primary); }
         .positive { color: #059669; font-weight: bold; }
-        .negative { color: #DC2626; font-weight: bold; }
+        .negative { color: var(--danger); font-weight: bold; }
         
-        /* View Toggling */
+        /* Checkbox grid for involved users */
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 4px;}
+        .checkbox-group label { display: flex; align-items: center; cursor: pointer; }
+        .checkbox-group input { width: auto; margin: 0 8px 0 0; }
+        
         .view { display: none; }
         .active-view { display: block; }
     </style>
@@ -83,12 +69,18 @@
         </div>
 
         <div class="card">
-            <h2>2. Add Expense</h2>
+            <h2 id="expenseFormTitle">2. Add Expense</h2>
             <form id="addExpenseForm">
                 <input type="text" id="expenseDesc" placeholder="What was it for?" required>
                 <input type="number" id="expenseAmount" placeholder="Amount ($)" step="0.01" required>
                 <select id="expensePayer" required></select>
-                <button type="submit">Record Expense</button>
+                
+                <p style="margin: 15px 0 5px 0; font-weight: bold; font-size: 14px;">Who was involved?</p>
+                <div id="involvedUsersContainer" class="checkbox-group">
+                    </div>
+
+                <button type="submit" id="submitExpenseBtn">Record Expense</button>
+                <button type="button" class="secondary" id="cancelEditBtn" style="display:none; width: 100%; margin-top: 8px;" onclick="cancelEdit()">Cancel Edit</button>
             </form>
         </div>
 
@@ -96,156 +88,189 @@
             <h2>3. Balances</h2>
             <ul id="settlementList"></ul>
         </div>
+
+        <div class="card">
+            <h2>Expense Log</h2>
+            <ul id="expenseLogList"></ul>
+        </div>
     </div>
 
     <script>
-        // --- STATE MANAGEMENT ---
-        // Load trips from localStorage or start empty
+        // --- STATE ---
         let trips = JSON.parse(localStorage.getItem('tripSplitData')) || [];
         let activeTripId = null;
+        let editingExpenseId = null; // Tracks if we are editing an expense
 
         // --- DOM ELEMENTS ---
-        const dashboardView = document.getElementById('dashboardView');
-        const tripView = document.getElementById('tripView');
-        const tripList = document.getElementById('tripList');
-        const currentTripTitle = document.getElementById('currentTripTitle');
-        const userList = document.getElementById('userList');
-        const expensePayerSelect = document.getElementById('expensePayer');
-        const settlementList = document.getElementById('settlementList');
+        const dashboardView = document.getElementById('dashboardView'), tripView = document.getElementById('tripView');
+        const tripList = document.getElementById('tripList'), currentTripTitle = document.getElementById('currentTripTitle');
+        const userList = document.getElementById('userList'), expensePayerSelect = document.getElementById('expensePayer');
+        const involvedUsersContainer = document.getElementById('involvedUsersContainer');
+        const settlementList = document.getElementById('settlementList'), expenseLogList = document.getElementById('expenseLogList');
+        const expenseForm = document.getElementById('addExpenseForm'), submitExpenseBtn = document.getElementById('submitExpenseBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn'), expenseFormTitle = document.getElementById('expenseFormTitle');
 
-        // --- CORE FUNCTIONS ---
-        function saveData() {
-            localStorage.setItem('tripSplitData', JSON.stringify(trips));
-        }
+        // --- UTILS ---
+        function saveData() { localStorage.setItem('tripSplitData', JSON.stringify(trips)); }
+        function getActiveTrip() { return trips.find(t => t.id === activeTripId); }
 
+        // --- DASHBOARD LOGIC ---
         function renderDashboard() {
             tripList.innerHTML = '';
-            if (trips.length === 0) {
-                tripList.innerHTML = '<p style="text-align:center; color:#6B7280;">No trips yet. Create one above!</p>';
-                return;
-            }
-
+            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:#6B7280;">No trips yet.</p>'; return; }
             trips.forEach(trip => {
-                const div = document.createElement('div');
-                div.className = 'trip-item';
+                const div = document.createElement('div'); div.className = 'trip-item';
                 div.innerHTML = `<strong>${trip.name}</strong> <br><small>${trip.users.length} members • ${trip.expenses.length} expenses</small>`;
-                div.onclick = () => openTrip(trip.id);
-                tripList.appendChild(div);
+                div.onclick = () => openTrip(trip.id); tripList.appendChild(div);
             });
         }
 
-        // --- EVENT LISTENERS: DASHBOARD ---
         document.getElementById('newTripForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const nameInput = document.getElementById('tripName');
-            const newTrip = {
-                id: Date.now().toString(), // Unique ID based on timestamp
-                name: nameInput.value.trim(),
-                users: [],
-                expenses: []
-            };
-            trips.push(newTrip);
-            saveData();
-            nameInput.value = '';
-            openTrip(newTrip.id);
+            const newTrip = { id: Date.now().toString(), name: document.getElementById('tripName').value.trim(), users: [], expenses: [] };
+            trips.push(newTrip); saveData(); document.getElementById('tripName').value = ''; openTrip(newTrip.id);
         });
 
-        // --- NAVIGATION ---
-        function openTrip(id) {
-            activeTripId = id;
-            dashboardView.classList.remove('active-view');
-            tripView.classList.add('active-view');
-            renderTripDetails();
-        }
+        function openTrip(id) { activeTripId = id; dashboardView.classList.remove('active-view'); tripView.classList.add('active-view'); cancelEdit(); renderTripDetails(); }
+        function goBackToDashboard() { activeTripId = null; tripView.classList.remove('active-view'); dashboardView.classList.add('active-view'); renderDashboard(); }
 
-        function goBackToDashboard() {
-            activeTripId = null;
-            tripView.classList.remove('active-view');
-            dashboardView.classList.add('active-view');
-            renderDashboard();
-        }
-
-        // --- EVENT LISTENERS: ACTIVE TRIP ---
-        function getActiveTrip() {
-            return trips.find(t => t.id === activeTripId);
-        }
-
+        // --- USER LOGIC ---
         document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const nameInput = document.getElementById('userName');
-            const name = nameInput.value.trim();
+            const name = document.getElementById('userName').value.trim();
             const trip = getActiveTrip();
-            
-            if (name && !trip.users.includes(name)) {
-                trip.users.push(name);
-                saveData();
-                renderTripDetails();
-                nameInput.value = '';
-            }
+            if (name && !trip.users.includes(name)) { trip.users.push(name); saveData(); renderTripDetails(); document.getElementById('userName').value = ''; }
         });
 
-        document.getElementById('addExpenseForm').addEventListener('submit', (e) => {
+        // --- EXPENSE LOGIC ---
+        expenseForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const trip = getActiveTrip();
             if (trip.users.length === 0) return alert("Add members first!");
 
-            const expense = {
+            // Get checked users
+            const checkboxes = document.querySelectorAll('input[name="involved"]:checked');
+            const involvedUsers = Array.from(checkboxes).map(cb => cb.value);
+            if(involvedUsers.length === 0) return alert("Select at least one involved user!");
+
+            const expenseData = {
+                id: editingExpenseId || Date.now().toString(),
                 desc: document.getElementById('expenseDesc').value,
                 amount: parseFloat(document.getElementById('expenseAmount').value),
-                payer: document.getElementById('expensePayer').value
+                payer: document.getElementById('expensePayer').value,
+                involvedUsers: involvedUsers
             };
 
-            trip.expenses.push(expense);
+            if (editingExpenseId) {
+                const index = trip.expenses.findIndex(e => e.id === editingExpenseId);
+                trip.expenses[index] = expenseData;
+            } else {
+                trip.expenses.push(expenseData);
+            }
+
             saveData();
+            cancelEdit();
             renderTripDetails();
-            
-            e.target.reset(); // Clear form
+            e.target.reset();
         });
 
-        // --- RENDER TRIP UI & CALCULATE BALANCES ---
-        function renderTripDetails() {
+        function deleteExpense(expenseId) {
+            if(!confirm("Are you sure you want to delete this expense?")) return;
             const trip = getActiveTrip();
-            if (!trip) return;
+            trip.expenses = trip.expenses.filter(e => e.id !== expenseId);
+            saveData(); renderTripDetails();
+        }
+
+        function editExpense(expenseId) {
+            const trip = getActiveTrip();
+            const exp = trip.expenses.find(e => e.id === expenseId);
+            if(!exp) return;
+
+            editingExpenseId = expenseId;
+            document.getElementById('expenseDesc').value = exp.desc;
+            document.getElementById('expenseAmount').value = exp.amount;
+            document.getElementById('expensePayer').value = exp.payer;
+
+            // Check the right boxes
+            const checkboxes = document.querySelectorAll('input[name="involved"]');
+            checkboxes.forEach(cb => { cb.checked = exp.involvedUsers.includes(cb.value); });
+
+            expenseFormTitle.textContent = "Edit Expense";
+            submitExpenseBtn.textContent = "Update Expense";
+            cancelEditBtn.style.display = "block";
+            window.scrollTo({ top: document.getElementById('expenseFormTitle').offsetTop, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingExpenseId = null;
+            expenseForm.reset();
+            expenseFormTitle.textContent = "2. Add Expense";
+            submitExpenseBtn.textContent = "Record Expense";
+            cancelEditBtn.style.display = "none";
+            // Reset checkboxes to all checked
+            document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
+        }
+
+        // --- RENDER UI & BALANCES ---
+        function renderTripDetails() {
+            const trip = getActiveTrip(); if (!trip) return;
 
             currentTripTitle.textContent = trip.name;
-            userList.innerHTML = '';
-            expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
+            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
+            involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
-            // 1. Render Users & Dropdown
+            // 1. Render Users, Dropdown, & Checkboxes
             trip.users.forEach(user => {
                 userList.innerHTML += `<li>${user}</li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
+                involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
             });
 
-            // 2. Calculate Net Balances
+            // 2. Render Expense Log
+            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em>No expenses yet.</em></li>';
+            trip.expenses.forEach(exp => {
+                // Fallback for older data without involvedUsers
+                const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
+                expenseLogList.innerHTML += `
+                    <li>
+                        <div>
+                            <strong>${exp.desc}</strong> - $${exp.amount.toFixed(2)}<br>
+                            <small>Paid by ${exp.payer} (Split by ${involvedCount})</small>
+                        </div>
+                        <div>
+                            <button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button>
+                            <button class="danger" onclick="deleteExpense('${exp.id}')">X</button>
+                        </div>
+                    </li>`;
+            });
+
+            // 3. Calculate Net Balances
             let balances = {};
             trip.users.forEach(u => balances[u] = 0);
 
             trip.expenses.forEach(exp => {
-                const split = exp.amount / trip.users.length;
+                const involved = exp.involvedUsers || trip.users; // Fallback for old data
+                if(involved.length === 0) return;
+                
+                const split = exp.amount / involved.length;
                 balances[exp.payer] += exp.amount;
-                trip.users.forEach(u => balances[u] -= split);
+                involved.forEach(u => balances[u] -= split);
             });
 
-            // 3. Render Balances
-            settlementList.innerHTML = '';
-            let settled = true;
-
+            // 4. Render Balances
+            settlementList.innerHTML = ''; let settled = true;
             for (const [user, balance] of Object.entries(balances)) {
                 if (Math.abs(balance) > 0.01) {
-                    settled = false;
-                    const li = document.createElement('li');
+                    settled = false; const li = document.createElement('li');
                     if (balance > 0) li.innerHTML = `<span>${user}</span> <span class="positive">gets $${balance.toFixed(2)}</span>`;
                     else li.innerHTML = `<span>${user}</span> <span class="negative">owes $${Math.abs(balance).toFixed(2)}</span>`;
                     settlementList.appendChild(li);
                 }
             }
-
             if (settled && trip.expenses.length > 0) settlementList.innerHTML = '<li><em>All settled!</em></li>';
             else if (trip.expenses.length === 0 && trip.users.length > 0) settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
         }
 
-        // Initialize App
         renderDashboard();
     </script>
 </body>
