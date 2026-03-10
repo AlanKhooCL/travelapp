@@ -22,6 +22,7 @@
         button:hover { background-color: #4338CA; }
         button.secondary { background-color: #6B7280; margin-bottom: 20px; width: auto; padding: 10px 20px; }
         button.danger { background-color: var(--danger); width: auto; padding: 5px 10px; margin-left: 5px;}
+        button.danger:hover { background-color: #B91C1C; }
         button.edit-btn { background-color: #F59E0B; width: auto; padding: 5px 10px; }
         ul { list-style-type: none; padding: 0; }
         li { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
@@ -30,6 +31,10 @@
         .trip-item:hover { border-color: var(--primary); }
         .settlement-amount { font-weight: bold; color: var(--text); background: #E5E7EB; padding: 4px 8px; border-radius: 4px;}
         
+        /* Header styling to put Back and Delete Trip buttons on same line */
+        .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .trip-header-actions button { margin-bottom: 0; }
+
         /* Checkbox grid */
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 4px;}
         .checkbox-group label { display: flex; align-items: center; cursor: pointer; }
@@ -56,7 +61,11 @@
     </div>
 
     <div id="tripView" class="view">
-        <button class="secondary" onclick="goBackToDashboard()">← Back to Trips</button>
+        <div class="trip-header-actions">
+            <button class="secondary" onclick="goBackToDashboard()">← Back</button>
+            <button class="danger" onclick="deleteTrip()">Delete Trip</button>
+        </div>
+        
         <h2 id="currentTripTitle" style="margin-top: 0;">Trip Details</h2>
 
         <div class="card">
@@ -113,7 +122,7 @@
         function saveData() { localStorage.setItem('tripSplitData', JSON.stringify(trips)); }
         function getActiveTrip() { return trips.find(t => t.id === activeTripId); }
 
-        // --- DASHBOARD LOGIC ---
+        // --- DASHBOARD & TRIP LOGIC ---
         function renderDashboard() {
             tripList.innerHTML = '';
             if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:#6B7280;">No trips yet.</p>'; return; }
@@ -133,6 +142,13 @@
         function openTrip(id) { activeTripId = id; dashboardView.classList.remove('active-view'); tripView.classList.add('active-view'); cancelEdit(); renderTripDetails(); }
         function goBackToDashboard() { activeTripId = null; tripView.classList.remove('active-view'); dashboardView.classList.add('active-view'); renderDashboard(); }
 
+        function deleteTrip() {
+            if (!confirm("Are you sure you want to delete this entire trip? This cannot be undone.")) return;
+            trips = trips.filter(t => t.id !== activeTripId);
+            saveData();
+            goBackToDashboard();
+        }
+
         // --- USER LOGIC ---
         document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -140,6 +156,26 @@
             const trip = getActiveTrip();
             if (name && !trip.users.includes(name)) { trip.users.push(name); saveData(); renderTripDetails(); document.getElementById('userName').value = ''; }
         });
+
+        function deleteUser(userName) {
+            const trip = getActiveTrip();
+            
+            // Safety check: is the user involved in any expenses?
+            const hasExpenses = trip.expenses.some(exp => 
+                exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName))
+            );
+
+            if (hasExpenses) {
+                alert(`Cannot remove ${userName}. They are involved in existing expenses. Please delete or edit those expenses first.`);
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to remove ${userName} from the trip?`)) return;
+
+            trip.users = trip.users.filter(u => u !== userName);
+            saveData();
+            renderTripDetails();
+        }
 
         // --- EXPENSE LOGIC ---
         expenseForm.addEventListener('submit', (e) => {
@@ -207,9 +243,13 @@
             userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
             involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
-            // 1. Render Users
+            // 1. Render Users (Now with Delete Button)
             trip.users.forEach(user => {
-                userList.innerHTML += `<li>${user}</li>`;
+                userList.innerHTML += `
+                    <li>
+                        <span>${user}</span>
+                        <button class="danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser('${user}')">X</button>
+                    </li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
                 involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
             });
@@ -239,42 +279,26 @@
             });
 
             // 4. DEBT SIMPLIFICATION ALGORITHM
-            let debtors = [];
-            let creditors = [];
+            let debtors = []; let creditors = [];
 
-            // Separate into who owes (debtors) and who is owed (creditors)
             for (const [user, balance] of Object.entries(balances)) {
                 if (balance < -0.01) debtors.push({ user, amount: Math.abs(balance) });
                 else if (balance > 0.01) creditors.push({ user, amount: balance });
             }
 
-            // Sort by largest amounts first to minimize transactions
             debtors.sort((a, b) => b.amount - a.amount);
             creditors.sort((a, b) => b.amount - a.amount);
 
-            let settlements = [];
-            let i = 0; // Debtors index
-            let j = 0; // Creditors index
+            let settlements = []; let i = 0; let j = 0;
 
-            // Match debtors and creditors
             while (i < debtors.length && j < creditors.length) {
-                let debtor = debtors[i];
-                let creditor = creditors[j];
-
-                // The amount to settle is the smaller of the two balances
+                let debtor = debtors[i]; let creditor = creditors[j];
                 let minAmount = Math.min(debtor.amount, creditor.amount);
                 
-                settlements.push({
-                    from: debtor.user,
-                    to: creditor.user,
-                    amount: minAmount
-                });
+                settlements.push({ from: debtor.user, to: creditor.user, amount: minAmount });
 
-                // Deduct the settled amount from both
-                debtor.amount -= minAmount;
-                creditor.amount -= minAmount;
+                debtor.amount -= minAmount; creditor.amount -= minAmount;
 
-                // Move to the next person if their balance is fully settled
                 if (Math.abs(debtor.amount) < 0.01) i++;
                 if (Math.abs(creditor.amount) < 0.01) j++;
             }
