@@ -12,6 +12,7 @@
             --text: #111827;
             --border: #E5E7EB;
             --danger: #DC2626;
+            --success: #059669;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); max-width: 600px; margin: 0 auto; padding: 20px; }
         h1, h2 { text-align: center; }
@@ -27,10 +28,9 @@
         li:last-child { border-bottom: none; }
         .trip-item { cursor: pointer; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; transition: 0.2s;}
         .trip-item:hover { border-color: var(--primary); }
-        .positive { color: #059669; font-weight: bold; }
-        .negative { color: var(--danger); font-weight: bold; }
+        .settlement-amount { font-weight: bold; color: var(--text); background: #E5E7EB; padding: 4px 8px; border-radius: 4px;}
         
-        /* Checkbox grid for involved users */
+        /* Checkbox grid */
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 4px;}
         .checkbox-group label { display: flex; align-items: center; cursor: pointer; }
         .checkbox-group input { width: auto; margin: 0 8px 0 0; }
@@ -47,7 +47,7 @@
         <div class="card">
             <h2>Create New Trip</h2>
             <form id="newTripForm">
-                <input type="text" id="tripName" placeholder="Trip Name (e.g., Bali 2026)" required>
+                <input type="text" id="tripName" placeholder="Trip Name (e.g., Tokyo 2026)" required>
                 <button type="submit">Start Trip</button>
             </form>
         </div>
@@ -76,8 +76,7 @@
                 <select id="expensePayer" required></select>
                 
                 <p style="margin: 15px 0 5px 0; font-weight: bold; font-size: 14px;">Who was involved?</p>
-                <div id="involvedUsersContainer" class="checkbox-group">
-                    </div>
+                <div id="involvedUsersContainer" class="checkbox-group"></div>
 
                 <button type="submit" id="submitExpenseBtn">Record Expense</button>
                 <button type="button" class="secondary" id="cancelEditBtn" style="display:none; width: 100%; margin-top: 8px;" onclick="cancelEdit()">Cancel Edit</button>
@@ -85,7 +84,7 @@
         </div>
 
         <div class="card">
-            <h2>3. Balances</h2>
+            <h2>3. How to Settle Up</h2>
             <ul id="settlementList"></ul>
         </div>
 
@@ -99,7 +98,7 @@
         // --- STATE ---
         let trips = JSON.parse(localStorage.getItem('tripSplitData')) || [];
         let activeTripId = null;
-        let editingExpenseId = null; // Tracks if we are editing an expense
+        let editingExpenseId = null;
 
         // --- DOM ELEMENTS ---
         const dashboardView = document.getElementById('dashboardView'), tripView = document.getElementById('tripView');
@@ -148,7 +147,6 @@
             const trip = getActiveTrip();
             if (trip.users.length === 0) return alert("Add members first!");
 
-            // Get checked users
             const checkboxes = document.querySelectorAll('input[name="involved"]:checked');
             const involvedUsers = Array.from(checkboxes).map(cb => cb.value);
             if(involvedUsers.length === 0) return alert("Select at least one involved user!");
@@ -168,10 +166,7 @@
                 trip.expenses.push(expenseData);
             }
 
-            saveData();
-            cancelEdit();
-            renderTripDetails();
-            e.target.reset();
+            saveData(); cancelEdit(); renderTripDetails(); e.target.reset();
         });
 
         function deleteExpense(expenseId) {
@@ -182,36 +177,29 @@
         }
 
         function editExpense(expenseId) {
-            const trip = getActiveTrip();
-            const exp = trip.expenses.find(e => e.id === expenseId);
+            const trip = getActiveTrip(); const exp = trip.expenses.find(e => e.id === expenseId);
             if(!exp) return;
-
             editingExpenseId = expenseId;
             document.getElementById('expenseDesc').value = exp.desc;
             document.getElementById('expenseAmount').value = exp.amount;
             document.getElementById('expensePayer').value = exp.payer;
 
-            // Check the right boxes
             const checkboxes = document.querySelectorAll('input[name="involved"]');
             checkboxes.forEach(cb => { cb.checked = exp.involvedUsers.includes(cb.value); });
 
-            expenseFormTitle.textContent = "Edit Expense";
-            submitExpenseBtn.textContent = "Update Expense";
+            expenseFormTitle.textContent = "Edit Expense"; submitExpenseBtn.textContent = "Update Expense";
             cancelEditBtn.style.display = "block";
             window.scrollTo({ top: document.getElementById('expenseFormTitle').offsetTop, behavior: 'smooth' });
         }
 
         function cancelEdit() {
-            editingExpenseId = null;
-            expenseForm.reset();
-            expenseFormTitle.textContent = "2. Add Expense";
-            submitExpenseBtn.textContent = "Record Expense";
+            editingExpenseId = null; expenseForm.reset();
+            expenseFormTitle.textContent = "2. Add Expense"; submitExpenseBtn.textContent = "Record Expense";
             cancelEditBtn.style.display = "none";
-            // Reset checkboxes to all checked
             document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
         }
 
-        // --- RENDER UI & BALANCES ---
+        // --- RENDER UI & CALCULATE DEBTS ---
         function renderTripDetails() {
             const trip = getActiveTrip(); if (!trip) return;
 
@@ -219,7 +207,7 @@
             userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
             involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
-            // 1. Render Users, Dropdown, & Checkboxes
+            // 1. Render Users
             trip.users.forEach(user => {
                 userList.innerHTML += `<li>${user}</li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
@@ -229,18 +217,11 @@
             // 2. Render Expense Log
             if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em>No expenses yet.</em></li>';
             trip.expenses.forEach(exp => {
-                // Fallback for older data without involvedUsers
                 const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
                 expenseLogList.innerHTML += `
                     <li>
-                        <div>
-                            <strong>${exp.desc}</strong> - $${exp.amount.toFixed(2)}<br>
-                            <small>Paid by ${exp.payer} (Split by ${involvedCount})</small>
-                        </div>
-                        <div>
-                            <button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button>
-                            <button class="danger" onclick="deleteExpense('${exp.id}')">X</button>
-                        </div>
+                        <div><strong>${exp.desc}</strong> - $${exp.amount.toFixed(2)}<br><small>Paid by ${exp.payer} (Split by ${involvedCount})</small></div>
+                        <div><button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button><button class="danger" onclick="deleteExpense('${exp.id}')">X</button></div>
                     </li>`;
             });
 
@@ -249,7 +230,7 @@
             trip.users.forEach(u => balances[u] = 0);
 
             trip.expenses.forEach(exp => {
-                const involved = exp.involvedUsers || trip.users; // Fallback for old data
+                const involved = exp.involvedUsers || trip.users; 
                 if(involved.length === 0) return;
                 
                 const split = exp.amount / involved.length;
@@ -257,18 +238,59 @@
                 involved.forEach(u => balances[u] -= split);
             });
 
-            // 4. Render Balances
-            settlementList.innerHTML = ''; let settled = true;
+            // 4. DEBT SIMPLIFICATION ALGORITHM
+            let debtors = [];
+            let creditors = [];
+
+            // Separate into who owes (debtors) and who is owed (creditors)
             for (const [user, balance] of Object.entries(balances)) {
-                if (Math.abs(balance) > 0.01) {
-                    settled = false; const li = document.createElement('li');
-                    if (balance > 0) li.innerHTML = `<span>${user}</span> <span class="positive">gets $${balance.toFixed(2)}</span>`;
-                    else li.innerHTML = `<span>${user}</span> <span class="negative">owes $${Math.abs(balance).toFixed(2)}</span>`;
-                    settlementList.appendChild(li);
-                }
+                if (balance < -0.01) debtors.push({ user, amount: Math.abs(balance) });
+                else if (balance > 0.01) creditors.push({ user, amount: balance });
             }
-            if (settled && trip.expenses.length > 0) settlementList.innerHTML = '<li><em>All settled!</em></li>';
-            else if (trip.expenses.length === 0 && trip.users.length > 0) settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
+
+            // Sort by largest amounts first to minimize transactions
+            debtors.sort((a, b) => b.amount - a.amount);
+            creditors.sort((a, b) => b.amount - a.amount);
+
+            let settlements = [];
+            let i = 0; // Debtors index
+            let j = 0; // Creditors index
+
+            // Match debtors and creditors
+            while (i < debtors.length && j < creditors.length) {
+                let debtor = debtors[i];
+                let creditor = creditors[j];
+
+                // The amount to settle is the smaller of the two balances
+                let minAmount = Math.min(debtor.amount, creditor.amount);
+                
+                settlements.push({
+                    from: debtor.user,
+                    to: creditor.user,
+                    amount: minAmount
+                });
+
+                // Deduct the settled amount from both
+                debtor.amount -= minAmount;
+                creditor.amount -= minAmount;
+
+                // Move to the next person if their balance is fully settled
+                if (Math.abs(debtor.amount) < 0.01) i++;
+                if (Math.abs(creditor.amount) < 0.01) j++;
+            }
+
+            // 5. Render Settlements to UI
+            settlementList.innerHTML = '';
+            if (settlements.length === 0) {
+                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em>Everyone is fully settled up!</em></li>';
+                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
+            } else {
+                settlements.forEach(s => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span><strong>${s.from}</strong> owes <strong>${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
+                    settlementList.appendChild(li);
+                });
+            }
         }
 
         renderDashboard();
