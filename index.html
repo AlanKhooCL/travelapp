@@ -18,7 +18,7 @@
         h1, h2 { text-align: center; }
         .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         input[type="text"], input[type="number"], select, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
-        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; }
+        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s;}
         button:hover { background-color: #4338CA; }
         button.secondary { background-color: #6B7280; margin-bottom: 20px; width: auto; padding: 10px 20px; }
         button.danger { background-color: var(--danger); width: auto; padding: 5px 10px; margin-left: 5px;}
@@ -31,17 +31,16 @@
         .trip-item:hover { border-color: var(--primary); }
         .settlement-amount { font-weight: bold; color: var(--text); background: #E5E7EB; padding: 4px 8px; border-radius: 4px;}
         
-        /* Header styling to put Back and Delete Trip buttons on same line */
         .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .trip-header-actions button { margin-bottom: 0; }
 
-        /* Checkbox grid */
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 4px;}
         .checkbox-group label { display: flex; align-items: center; cursor: pointer; }
         .checkbox-group input { width: auto; margin: 0 8px 0 0; }
         
         .view { display: none; }
         .active-view { display: block; }
+        #loadingMsg { text-align: center; color: #6B7280; font-style: italic; margin-bottom: 20px;}
     </style>
 </head>
 <body>
@@ -56,7 +55,9 @@
                 <button type="submit">Start Trip</button>
             </form>
         </div>
+        
         <h2>Your Trips</h2>
+        <div id="loadingMsg">Fetching trips from Google Sheets... ⏳</div>
         <div id="tripList"></div>
     </div>
 
@@ -95,6 +96,7 @@
         <div class="card">
             <h2>3. How to Settle Up</h2>
             <ul id="settlementList"></ul>
+            <button id="copySettlementsBtn" class="secondary" style="display:none; width: 100%; margin-top: 15px; background-color: #10B981; color: white;" onclick="copySettlements()">📋 Copy Settlements to Clipboard</button>
         </div>
 
         <div class="card">
@@ -104,25 +106,71 @@
     </div>
 
     <script>
-        // --- STATE ---
-        let trips = JSON.parse(localStorage.getItem('tripSplitData')) || [];
+        // --- STATE & CONFIG ---
+        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbzu1o_GGtGW-dhOFuRa01QnsvRneM2Q3mdDIM__sYnHGKOOAXaJF8WNpdTYtxVMd4Q7/exec";
+        
+        let trips = [];
         let activeTripId = null;
         let editingExpenseId = null;
+        let currentSettlements = []; // Used for clipboard
 
         // --- DOM ELEMENTS ---
         const dashboardView = document.getElementById('dashboardView'), tripView = document.getElementById('tripView');
-        const tripList = document.getElementById('tripList'), currentTripTitle = document.getElementById('currentTripTitle');
+        const tripList = document.getElementById('tripList'), loadingMsg = document.getElementById('loadingMsg');
+        const currentTripTitle = document.getElementById('currentTripTitle');
         const userList = document.getElementById('userList'), expensePayerSelect = document.getElementById('expensePayer');
         const involvedUsersContainer = document.getElementById('involvedUsersContainer');
         const settlementList = document.getElementById('settlementList'), expenseLogList = document.getElementById('expenseLogList');
         const expenseForm = document.getElementById('addExpenseForm'), submitExpenseBtn = document.getElementById('submitExpenseBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn'), expenseFormTitle = document.getElementById('expenseFormTitle');
+        const copySettlementsBtn = document.getElementById('copySettlementsBtn');
 
-        // --- UTILS ---
-        function saveData() { localStorage.setItem('tripSplitData', JSON.stringify(trips)); }
+        // --- GOOGLE SHEETS INTEGRATION ---
+        async function loadDataFromGoogle() {
+            try {
+                const response = await fetch(GOOGLE_API_URL);
+                trips = await response.json();
+                loadingMsg.style.display = 'none';
+                renderDashboard();
+            } catch (error) {
+                console.error("Error loading data:", error);
+                loadingMsg.innerHTML = '<span style="color:red;">Failed to connect to Google Sheets. Check console.</span>';
+            }
+        }
+
+        async function saveData(tripToSave) {
+            if (!tripToSave) return;
+            try {
+                // We use text/plain to avoid CORS preflight errors with Apps Script
+                await fetch(GOOGLE_API_URL, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: 'saveTrip', trip: tripToSave })
+                });
+                console.log("Saved to Google Sheets!");
+            } catch (error) {
+                console.error("Error saving data:", error);
+                // In a real app, you might show a toast notification here
+            }
+        }
+
+        async function executeDeleteTrip(tripId) {
+            try {
+                await fetch(GOOGLE_API_URL, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: 'deleteTrip', tripId: tripId })
+                });
+            } catch (error) {
+                console.error("Error deleting trip:", error);
+            }
+        }
+
         function getActiveTrip() { return trips.find(t => t.id === activeTripId); }
 
-        // --- DASHBOARD & TRIP LOGIC ---
+        // --- DASHBOARD & TRIP NAVIGATION ---
         function renderDashboard() {
             tripList.innerHTML = '';
             if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:#6B7280;">No trips yet.</p>'; return; }
@@ -135,8 +183,11 @@
 
         document.getElementById('newTripForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const newTrip = { id: Date.now().toString(), name: document.getElementById('tripName').value.trim(), users: [], expenses: [] };
-            trips.push(newTrip); saveData(); document.getElementById('tripName').value = ''; openTrip(newTrip.id);
+            const newTrip = { id: 'TRIP_' + Date.now().toString(), name: document.getElementById('tripName').value.trim(), users: [], expenses: [] };
+            trips.push(newTrip); 
+            document.getElementById('tripName').value = ''; 
+            openTrip(newTrip.id);
+            saveData(newTrip); // Background save
         });
 
         function openTrip(id) { activeTripId = id; dashboardView.classList.remove('active-view'); tripView.classList.add('active-view'); cancelEdit(); renderTripDetails(); }
@@ -144,9 +195,10 @@
 
         function deleteTrip() {
             if (!confirm("Are you sure you want to delete this entire trip? This cannot be undone.")) return;
+            const tripIdToDelete = activeTripId;
             trips = trips.filter(t => t.id !== activeTripId);
-            saveData();
             goBackToDashboard();
+            executeDeleteTrip(tripIdToDelete); // Background delete
         }
 
         // --- USER LOGIC ---
@@ -154,27 +206,23 @@
             e.preventDefault();
             const name = document.getElementById('userName').value.trim();
             const trip = getActiveTrip();
-            if (name && !trip.users.includes(name)) { trip.users.push(name); saveData(); renderTripDetails(); document.getElementById('userName').value = ''; }
+            if (name && !trip.users.includes(name)) { 
+                trip.users.push(name); 
+                renderTripDetails(); 
+                document.getElementById('userName').value = ''; 
+                saveData(trip); 
+            }
         });
 
         function deleteUser(userName) {
             const trip = getActiveTrip();
-            
-            // Safety check: is the user involved in any expenses?
-            const hasExpenses = trip.expenses.some(exp => 
-                exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName))
-            );
-
-            if (hasExpenses) {
-                alert(`Cannot remove ${userName}. They are involved in existing expenses. Please delete or edit those expenses first.`);
-                return;
-            }
-
-            if (!confirm(`Are you sure you want to remove ${userName} from the trip?`)) return;
+            const hasExpenses = trip.expenses.some(exp => exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName)));
+            if (hasExpenses) return alert(`Cannot remove ${userName}. They are involved in existing expenses.`);
+            if (!confirm(`Remove ${userName} from the trip?`)) return;
 
             trip.users = trip.users.filter(u => u !== userName);
-            saveData();
             renderTripDetails();
+            saveData(trip);
         }
 
         // --- EXPENSE LOGIC ---
@@ -188,7 +236,7 @@
             if(involvedUsers.length === 0) return alert("Select at least one involved user!");
 
             const expenseData = {
-                id: editingExpenseId || Date.now().toString(),
+                id: editingExpenseId || 'EXP_' + Date.now().toString(),
                 desc: document.getElementById('expenseDesc').value,
                 amount: parseFloat(document.getElementById('expenseAmount').value),
                 payer: document.getElementById('expensePayer').value,
@@ -202,14 +250,16 @@
                 trip.expenses.push(expenseData);
             }
 
-            saveData(); cancelEdit(); renderTripDetails(); e.target.reset();
+            cancelEdit(); renderTripDetails(); e.target.reset();
+            saveData(trip);
         });
 
         function deleteExpense(expenseId) {
             if(!confirm("Are you sure you want to delete this expense?")) return;
             const trip = getActiveTrip();
             trip.expenses = trip.expenses.filter(e => e.id !== expenseId);
-            saveData(); renderTripDetails();
+            renderTripDetails();
+            saveData(trip);
         }
 
         function editExpense(expenseId) {
@@ -235,6 +285,29 @@
             document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
         }
 
+        // --- COPY TO CLIPBOARD LOGIC ---
+        function copySettlements() {
+            const trip = getActiveTrip();
+            if(!trip || currentSettlements.length === 0) return;
+
+            let text = `✈️ Trip: ${trip.name}\n`;
+            text += `------------------------\n`;
+            currentSettlements.forEach(s => {
+                text += `💸 ${s.from} owes ${s.to} $${s.amount.toFixed(2)}\n`;
+            });
+            text += `------------------------\n`;
+            text += `Calculated by TripSplit`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = copySettlementsBtn.innerText;
+                copySettlementsBtn.innerText = "✅ Copied to Clipboard!";
+                setTimeout(() => { copySettlementsBtn.innerText = originalText; }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Clipboard access denied. Please copy manually.");
+            });
+        }
+
         // --- RENDER UI & CALCULATE DEBTS ---
         function renderTripDetails() {
             const trip = getActiveTrip(); if (!trip) return;
@@ -243,13 +316,9 @@
             userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
             involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
-            // 1. Render Users (Now with Delete Button)
+            // 1. Render Users
             trip.users.forEach(user => {
-                userList.innerHTML += `
-                    <li>
-                        <span>${user}</span>
-                        <button class="danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser('${user}')">X</button>
-                    </li>`;
+                userList.innerHTML += `<li><span>${user}</span><button class="danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser('${user}')">X</button></li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
                 involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
             });
@@ -272,7 +341,6 @@
             trip.expenses.forEach(exp => {
                 const involved = exp.involvedUsers || trip.users; 
                 if(involved.length === 0) return;
-                
                 const split = exp.amount / involved.length;
                 balances[exp.payer] += exp.amount;
                 involved.forEach(u => balances[u] -= split);
@@ -280,44 +348,9 @@
 
             // 4. DEBT SIMPLIFICATION ALGORITHM
             let debtors = []; let creditors = [];
-
             for (const [user, balance] of Object.entries(balances)) {
                 if (balance < -0.01) debtors.push({ user, amount: Math.abs(balance) });
                 else if (balance > 0.01) creditors.push({ user, amount: balance });
             }
 
             debtors.sort((a, b) => b.amount - a.amount);
-            creditors.sort((a, b) => b.amount - a.amount);
-
-            let settlements = []; let i = 0; let j = 0;
-
-            while (i < debtors.length && j < creditors.length) {
-                let debtor = debtors[i]; let creditor = creditors[j];
-                let minAmount = Math.min(debtor.amount, creditor.amount);
-                
-                settlements.push({ from: debtor.user, to: creditor.user, amount: minAmount });
-
-                debtor.amount -= minAmount; creditor.amount -= minAmount;
-
-                if (Math.abs(debtor.amount) < 0.01) i++;
-                if (Math.abs(creditor.amount) < 0.01) j++;
-            }
-
-            // 5. Render Settlements to UI
-            settlementList.innerHTML = '';
-            if (settlements.length === 0) {
-                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em>Everyone is fully settled up!</em></li>';
-                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
-            } else {
-                settlements.forEach(s => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span><strong>${s.from}</strong> owes <strong>${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
-                    settlementList.appendChild(li);
-                });
-            }
-        }
-
-        renderDashboard();
-    </script>
-</body>
-</html>
