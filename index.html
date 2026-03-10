@@ -3,882 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>East Asia Spring Escape</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+    <title>Trip Expense Splitter</title>
     <style>
-        /* Hide scrollbar for the filter navigation */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
+        :root {
+            --primary: #4F46E5;
+            --bg: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --text: #111827;
+            --border: #E5E7EB;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
         }
-
-        /* Cherry Blossom Effects */
-        @keyframes fall {
-            0% { 
-                transform: translate3d(0, -10vh, 0) rotate(0deg); 
-                opacity: 0;
-            }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% { 
-                transform: translate3d(20vw, 110vh, 0) rotate(360deg); 
-                opacity: 0;
-            }
+        h1, h2 { text-align: center; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .petal {
-            position: absolute;
-            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
-            border-radius: 15px 0px 15px 0px;
-            box-shadow: 0 0 4px rgba(255, 182, 193, 0.6);
-            animation: fall linear infinite;
-        }
-
-        /* Leaflet map styling */
-        .day-map {
-            height: 300px;
+        input, select, button {
             width: 100%;
-            border-radius: 1rem;
-            z-index: 1;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
         }
-
-        /* Expense input styling */
-        .expense-input {
-            width: 90px;
-            padding: 2px 6px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            text-align: right;
-            transition: border-color 0.2s;
-            background: #f8fafc;
-        }
-        .expense-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
-            background: #fff;
-        }
-
-        /* Budget summary bar */
-        .budget-bar-fill {
-            transition: width 0.5s ease;
-        }
-
-        /* Map toggle button */
-        .map-toggle-btn {
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
             cursor: pointer;
-            transition: all 0.2s;
+            font-weight: bold;
         }
-        .map-toggle-btn:hover {
-            transform: scale(1.05);
+        button:hover { background-color: #4338CA; }
+        ul { list-style-type: none; padding: 0; }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
         }
-
-        /* Smooth collapse */
-        .map-container {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease, padding 0.4s ease;
-        }
-        .map-container.open {
-            max-height: 400px;
-            padding-top: 12px;
-            padding-bottom: 12px;
-        }
+        li:last-child { border-bottom: none; }
+        .positive { color: #059669; font-weight: bold; }
+        .negative { color: #DC2626; font-weight: bold; }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 font-sans text-slate-800">
+<body>
 
-    <div id="blossom-container" class="fixed inset-0 pointer-events-none overflow-hidden z-50"></div>
+    <h1>✈️ TripSplit</h1>
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-6">
-            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2" id="header-title"></h1>
-            <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-medium" id="header-meta">
-                </div>
+    <div class="card">
+        <h2>1. Add Trip Members</h2>
+        <form id="addUserForm">
+            <input type="text" id="userName" placeholder="Enter name (e.g., Alice)" required>
+            <button type="submit">Add Member</button>
+        </form>
+        <ul id="userList"></ul>
+    </div>
 
-            <div class="flex overflow-x-auto gap-2 mt-6 pb-2 no-scrollbar" id="filter-nav">
-                </div>
-        </div>
-    </header>
+    <div class="card">
+        <h2>2. Add an Expense</h2>
+        <form id="addExpenseForm">
+            <input type="text" id="expenseDesc" placeholder="What was it for? (e.g., Dinner)" required>
+            <input type="number" id="expenseAmount" placeholder="Total Amount ($)" step="0.01" required>
+            <select id="expensePayer" required>
+                <option value="" disabled selected>Who paid?</option>
+            </select>
+            <button type="submit">Record Expense</button>
+        </form>
+    </div>
 
-    <main class="max-w-5xl mx-auto px-4 py-8" id="main-content">
-        </main>
+    <div class="card">
+        <h2>3. Who Owes Whom?</h2>
+        <ul id="settlementList">
+            <li><em>Add members and expenses to see balances.</em></li>
+        </ul>
+    </div>
 
     <script>
-        // --- DATA ---
-        const tripData = {
-            overview: {
-                title: "East Asia Spring Escape",
-                dates: "April 14 - April 24, 2026",
-                totalBudget: "$2,916 SGD (Base Flights + Accomm)",
-            },
-            budget: [
-                { item: "Flights (SG <> JP/KR + Inter-city)", cost: "$1,098", amount: 1098, icon: "plane-takeoff" },
-                { item: "Tokyo: Dai-ichi Hotel (5 Nights)", cost: "$1,055", amount: 1055, icon: "bed-double" },
-                { item: "Jeju: Airbnb (3 Nights)", cost: "$482", amount: 482, icon: "palmtree" },
-                { item: "Seoul: Mercure Hongdae (2 Nights)", cost: "$281", amount: 281, icon: "bed-double" },
-            ],
-            locations: [
-                { id: 'tokyo', name: 'Tokyo', color: 'pink', image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1000&q=80' },
-                { id: 'jeju', name: 'Jeju Island', color: 'orange', image: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=1000&q=80' },
-                { id: 'seoul', name: 'Seoul', color: 'purple', image: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=1000&q=80' }
-            ],
-            itinerary: [
-                // TOKYO
-                {
-                    day: 1, date: "Apr 14 (Tue)", location: "tokyo", title: "Arrival in Japan",
-                    events: [
-                        { time: "1:55 PM", desc: "Depart Singapore <span class=\"block text-sm font-normal text-slate-500 mt-1\">Ensure you have your Visit Japan Web QR codes ready for swift immigration.</span>", icon: "plane-takeoff", expense: 0 },
-                        { time: "9:55 PM", desc: "Arrive at Tokyo Haneda Airport <span class=\"block text-sm font-normal text-slate-500 mt-1\">Navigate to the Tokyo Monorail or Keikyu Line for transit into the city.</span>", icon: "plane-landing", link: "https://www.google.com/maps/search/?api=1&query=Haneda+Airport", latlng: [35.5494, 139.7798], expense: 0 },
-                        { time: "11:00 PM", desc: "Check-in: Dai-ichi Hotel Tokyo (Shimbashi) <span class=\"block text-sm font-normal text-slate-500 mt-1\">Excellent base location with direct connections to the Yamanote Line.</span>", icon: "bed-double", link: "https://www.agoda.com/dai-ichi-hotel-tokyo/hotel/tokyo-jp.html", latlng: [35.6656, 139.7581], expense: 0 }
-                    ]
-                },
-                {
-                    day: 2, date: "Apr 15 (Wed)", location: "tokyo", title: "Coffee, Akihabara & Ginza",
-                    events: [
-                        { time: "11:00 AM", desc: "Coffee Omakase @ Koffee Mameya Kakeru <span class=\"block text-sm font-normal text-slate-500 mt-1\">A highly curated coffee tasting journey exploring different premium roasts and brewing techniques.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Koffee+Mameya+Kakeru+Tokyo", latlng: [35.6615, 139.7106], expense: 0 },
-                        { time: "1:00 PM", desc: "Lunch @ Gyukatsu Ichi Ni San <span class=\"block text-sm font-normal text-slate-500 mt-1\">Famous for melt-in-your-mouth breaded beef cutlets you sear on your own personal hot stone.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Gyukatsu+Ichi+Ni+San+Akihabara", latlng: [35.6984, 139.7731], expense: 0 },
-                        { 
-                            time: "2:30 PM", 
-                            desc: "Explore Akihabara <span class=\"block text-sm font-normal text-slate-500 mt-1\">Japan's vibrant epicenter for otaku culture, retro gaming, and electronics.</span>", 
-                            icon: "shopping-bag", 
-                            link: "https://www.google.com/maps/search/?api=1&query=Akihabara+Tokyo",
-                            latlng: [35.7023, 139.7745],
-                            expense: 0,
-                            subLinks: [
-                                { name: "Trader (Retro Games/Anime)", link: "https://www.google.com/maps/search/?api=1&query=Trader+Akihabara" },
-                                { name: "Lashinbang Radio Kaikan", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara" },
-                                { name: "AmiAmi (Figures)", link: "https://www.google.com/maps/search/?api=1&query=AmiAmi+Akihabara" },
-                                { name: "GU AKIBA TOLIM", link: "https://www.google.com/maps/search/?api=1&query=GU+Akihabara+Tolim" },
-                                { name: "Club Marion Yodobashi Akiba (crepes)", link: "https://www.google.com/maps/search/?api=1&query=Club+Marion+Yodobashi+Akiba" },
-                                { name: "Maidreamin (Maid Cafe)", link: "https://www.google.com/maps/search/?api=1&query=Maidreamin+Akihabara" }
-                            ]
-                        },
-                        { time: "5:30 PM", desc: "Daruma Doll Painting <span class=\"block text-sm font-normal text-slate-500 mt-1\">Paint a traditional Japanese talisman of good luck and perseverance. Don't forget to set an intention when painting the first eye!</span>", icon: "hammer", link: "https://www.klook.com/en-SG/activity/176779-tokyo-create-your-own-daruma-experience/", latlng: [35.6595, 139.7004], expense: 0 },
-                        { 
-                            time: "7:00 PM", 
-                            desc: "<mark class=\"bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md font-bold shadow-sm border border-pink-200\">Dinner @ Ginza</mark> <span class=\"block text-sm font-normal text-slate-500 mt-1\">Check out these tucked-away local favorites instead of the usual tourist traps:</span>", 
-                            icon: "utensils", 
-                            link: "https://www.google.com/maps/search/?api=1&query=Ginza+Tokyo+Restaurants", 
-                            latlng: [35.6717, 139.7649], 
-                            expense: 0,
-                            subLinks: [
-                                { name: "Mugi to Olive (Michelin-recognized clam broth ramen)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara6" },
-                                { name: "Sato Yosuke (Silky, traditional Inaniwa udon in a refined setting)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara7" }
-                            ]
-                        },
-                        { time: "9:00 PM", desc: "Return to Hotel", icon: "bed-double", expense: 0 }
-                    ]
-                },
-                {
-                    day: 3, date: "Apr 16 (Thu)", location: "tokyo", title: "Kamakura Coastal Day Trip",
-                    events: [
-                        { time: "9:00 AM", desc: "Tsurugaoka Hachimangu Shrine & Komachi Street <span class=\"block text-sm font-normal text-slate-500 mt-1\">Kamakura's most important Shinto shrine, approached via a bustling street of traditional snacks and souvenirs.</span>", icon: "map-pin", link: "https://www.google.com/maps/search/?api=1&query=Tsurugaoka+Hachimangu+Shrine+Kamakura", latlng: [35.3260, 139.5565], expense: 0 },
-                        { time: "12:00 PM", desc: "Great Buddha at Kotoku-in & Hasedera Temple <span class=\"block text-sm font-normal text-slate-500 mt-1\">Marvel at the monumental 13m bronze Buddha and explore Hasedera's stunning hillside gardens.</span>", icon: "camera", link: "https://www.google.com/maps/search/?api=1&query=Kotoku-in+Temple+Kamakura", latlng: [35.3167, 139.5356], expense: 0 },
-                        { time: "2:00 PM", desc: "Late Lunch @ Bills Cafe Shichirigahama <span class=\"block text-sm font-normal text-slate-500 mt-1\">Famous for ricotta hotcakes with sweeping views of the Pacific Ocean.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Bills+Cafe+Shichirigahama", latlng: [35.3065, 139.5109], expense: 0 },
-                        { time: "4:00 PM", desc: "Shichirigahama Beach & Koshigoe Park <span class=\"block text-sm font-normal text-slate-500 mt-1\">Relax on the black sand beach. On clear days, you can spot Mount Fuji on the horizon.</span>", icon: "sunset", link: "https://www.google.com/maps/search/?api=1&query=Shichirigahama+Beach", latlng: [35.3048, 139.5064], expense: 0 },
-                        { time: "5:00 PM", desc: "Hatoya Kamakura <span class=\"block text-sm font-normal text-slate-500 mt-1\">A quick stop for artisanal matcha and rich, creamy ice cream.</span>", icon: "utensils", link: "https://maps.app.goo.gl/aPSCzpM1YoUwoRPQ7", latlng: [35.3190, 139.5502], expense: 0 },
-                        { 
-                            time: "6:00 PM", 
-                            desc: "<mark class=\"bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md font-bold shadow-sm border border-pink-200\">Dinner @ Tokyo Station</mark> <span class=\"block text-sm font-normal text-slate-500 mt-1\">Instead of a standard bento, try these amazing station highlights:</span>", 
-                            icon: "utensils", 
-                            latlng: [35.6812, 139.7671], 
-                            expense: 0,
-                            subLinks: [
-                                { name: "Rokurinsha (Legendary rich tsukemen in Ramen Street)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara8" },
-                                { name: "Toyama Shiroebitei (Rare white shrimp bowls hidden in First Avenue)", link: "https://www.google.com/maps/search/?api=1&query=Lashinbang+Radio+Kaikan+Akihabara9" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    day: 4, date: "Apr 17 (Fri)", location: "tokyo", title: "Kawagoe & Thrifting",
-                    events: [
-                        { time: "10:30 AM", desc: "Hikawa Shrine & Kurazukuri Street <span class=\"block text-sm font-normal text-slate-500 mt-1\">Known as 'Little Edo'. Walk among clay-walled warehouse buildings from the 1800s.</span>", icon: "camera", link: "https://maps.app.goo.gl/ZY1jd33zum3PUW9f7", latlng: [35.9251, 139.4858], expense: 0 },
-                        { time: "12:00 PM", desc: "Toki no Kane <span class=\"block text-sm font-normal text-slate-500 mt-1\">The iconic wooden Time Bell Tower that has chimed for Kawagoe for over four centuries.</span>", icon: "camera", link: "https://maps.app.goo.gl/DDkvtRxBCVUBCS3s7", latlng: [35.9228, 139.4855], expense: 0 },
-                        { time: "12:15 PM", desc: "Lunch @ Kurazukuri Street <span class=\"block text-sm font-normal text-slate-500 mt-1\">Try local specialties, particularly anything made with Kawagoe's famous sweet potatoes.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Kurazukuri+Street+Kawagoe", latlng: [35.9230, 139.4850], expense: 0 },
-                        { time: "1:30 PM", desc: "Wood Works Kawagoe <span class=\"block text-sm font-normal text-slate-500 mt-1\">Craft your own set of personalized, traditional Japanese chopsticks.</span>", icon: "hammer", link: "https://www.google.com/maps/search/?api=1&query=Wood+Works+Kawagoe", latlng: [35.9220, 139.4845], expense: 0 },
-                        { time: "3:00 PM", desc: "Kashiya Yokocho <span class=\"block text-sm font-normal text-slate-500 mt-1\">'Penny Candy Alley'—a nostalgic street lined with stores selling traditional Japanese sweets.</span>", icon: "shopping-bag", link: "https://maps.app.goo.gl/RSdw3V35vozDsjxb8", latlng: [35.9245, 139.4835], expense: 0 },
-                        { time: "5:00 PM", desc: "Thrift Shopping @ Bookoff Super Bazaar <span class=\"block text-sm font-normal text-slate-500 mt-1\">A massive secondhand store in Saitama perfect for scoring cheap clothing, games, and electronics.</span>", icon: "shopping-bag", link: "https://www.google.com/maps/search/?api=1&query=Bookoff+Super+Bazaar+Saitama", latlng: [35.8617, 139.6455], expense: 0 },
-                        { time: "8:00 PM", desc: "Dinner: Miroku Yaesu <span class=\"block text-sm font-normal text-slate-500 mt-1\">A highly rated spot near Tokyo Station known for hearty offal BBQ (horumon).</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Miroku+Yaesu+Tokyo", latlng: [35.6802, 139.7704], expense: 0 }
-                    ]
-                },
-                {
-                    day: 5, date: "Apr 18 (Sat)", location: "tokyo", title: "Ginza Eats & Onsen",
-                    events: [
-                        { time: "10:00 AM", desc: "Dog Cafe (Ginza Cottage & M) <span class=\"block text-sm font-normal text-slate-500 mt-1\">Start the morning relaxing with some furry friends in the heart of Ginza.</span>", icon: "map-pin", link: "https://www.google.com/maps/search/?api=1&query=Ginza+Cottage+M+Tokyo", latlng: [35.6720, 139.7650], expense: 0 },
-                        { time: "12:00 PM", desc: "Lunch: Ginza Hachigou <span class=\"block text-sm font-normal text-slate-500 mt-1\">Michelin-starred ramen renowned for its clear duck and chicken broth made entirely without soy sauce (tare).</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Ginza+Hachigou", latlng: [35.6710, 139.7630], expense: 0 },
-                        { time: "1:30 PM", desc: "Desserts Hop <span class=\"block text-sm font-normal text-slate-500 mt-1\">Sample Benizuru's fluffy pancakes, Aigre Douce pastries, or refined Shizuka sweets.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Aigre+Douce+Tokyo", latlng: [35.6700, 139.7610], expense: 0 },
-                        { time: "3:00 PM", desc: "Relax @ Spa LaQua or Toyosu Manyo Club <span class=\"block text-sm font-normal text-slate-500 mt-1\">Unwind in massive hot spring complexes featuring natural geothermal waters pumped directly from underground.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Toyosu+Manyo+Club+Onsen", latlng: [35.6473, 139.7907], expense: 0 },
-                        { time: "7:00 PM", desc: "Shizuka Natural Sweets Laboratory <span class=\"block text-sm font-normal text-slate-500 mt-1\">Pick up beautifully packaged, eco-conscious baked goods for gifts.</span>", icon: "shopping-bag", link: "https://maps.app.goo.gl/WgKFrke8QrYgwGLG7", latlng: [35.6707, 139.7634], expense: 0 }
-                    ]
-                },
-                // JEJU
-                {
-                    day: 6, date: "Apr 19 (Sun)", location: "jeju", title: "Transit to Jeju",
-                    events: [
-                        { time: "12:00 PM", desc: "Check out of Tokyo Hotel", icon: "bed-double", expense: 0 },
-                        { time: "1:30 PM", desc: "Lunch @ Narita airport", icon: "utensils", latlng: [35.7719, 140.3929], expense: 0 },
-                        { time: "4:35 PM", desc: "Flight from Narita to Jeju", icon: "plane-takeoff", expense: 0 },
-                        { time: "8:00 PM", desc: "Arrive in Jeju & dabao dinner <span class=\"block text-sm font-normal text-slate-500 mt-1\">Grab a quick local bite to go—Jeju is known for its incredible seafood and pork.</span>", icon: "utensils", latlng: [33.5104, 126.4914], expense: 0 },
-                        { time: "9:00 PM", desc: "Transfer to Airbnb (Monterrey) <span class=\"block text-sm font-normal text-slate-500 mt-1\">Settle in and rest up for tomorrow's island exploration.</span>", icon: "bed-double", latlng: [33.4890, 126.4983], expense: 0 }
-                    ]
-                },
-                {
-                    day: 7, date: "Apr 20 (Mon)", location: "jeju", title: "East Jeju Exploring",
-                    events: [
-                        { time: "10:00 AM", desc: "Breakfast @ Mou Moon Cafe <span class=\"block text-sm font-normal text-slate-500 mt-1\">Relaxing cafe in Woljeongri with massive panoramic windows facing the emerald ocean.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Mou+Moon+Cafe+Jeju", latlng: [33.5562, 126.7296], expense: 0 },
-                        { time: "11:15 AM", desc: "Lunch @ Myeongjin Abalone <span class=\"block text-sm font-normal text-slate-500 mt-1\">A legendary local spot famous for its sizzling abalone stone pot rice.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Myeongjin+Abalone+Jeju", latlng: [33.4611, 126.9363], expense: 0 },
-                        { time: "12:30 PM", desc: "Hike Seongsan Ilchulbong <span class=\"block text-sm font-normal text-slate-500 mt-1\">A 20-minute hike up a UNESCO World Heritage hydrovolcanic tuff cone crater.</span>", icon: "camera", link: "https://www.google.com/maps/search/?api=1&query=Seongsan+Ilchulbong+Jeju", latlng: [33.4588, 126.9406], expense: 0 },
-                        { time: "2:00 PM", desc: "Haenyeo Show <span class=\"block text-sm font-normal text-slate-500 mt-1\">Watch Jeju's iconic elderly female free-divers demonstrate traditional, gear-free harvesting techniques.</span>", icon: "camera", latlng: [33.4580, 126.9400], expense: 0 },
-                        { time: "3:00 PM", desc: "Fritz Coffee Company <span class=\"block text-sm font-normal text-slate-500 mt-1\">A retro-Korean style cafe serving excellent pastries and coffee blends.</span>", icon: "utensils", link: "https://maps.app.goo.gl/7qVUSi77qoE5HXbz6", latlng: [33.4550, 126.9200], expense: 0 },
-                        { time: "5:30 PM", desc: "Dinner: Black Pork KBBQ <span class=\"block text-sm font-normal text-slate-500 mt-1\">Jeju's most famous culinary export, best enjoyed with a glass of local Tangerine Makgeolli.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Suksungdo+Jeju", latlng: [33.4996, 126.5312], expense: 0 }
-                    ]
-                },
-                {
-                    day: 8, date: "Apr 21 (Tue)", location: "jeju", title: "South/West Jeju Wonders",
-                    events: [
-                        { time: "10:00 AM", desc: "Gyulkkot Darak or Gamttanam Cafe <span class=\"block text-sm font-normal text-slate-500 mt-1\">Tangerine-themed cafes offering beautiful photo zones and citrus-infused desserts.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Gamttanam+Cafe+Jeju", latlng: [33.2897, 126.3620], expense: 0 },
-                        { time: "11:30 AM", desc: "Jusangjeollidae Cliff <span class=\"block text-sm font-normal text-slate-500 mt-1\">Observe striking volcanic rock formations featuring distinct hexagonal basalt columns plunging into the sea.</span>", icon: "camera", link: "https://www.google.com/maps/search/?api=1&query=Jusangjeollidae+Cliff+Jeju", latlng: [33.2375, 126.4258], expense: 0 },
-                        { time: "12:00 PM", desc: "Lunch @ nearby sashimi place <span class=\"block text-sm font-normal text-slate-500 mt-1\">Fresh cuts right off the southern coast.</span>", icon: "utensils", latlng: [33.2380, 126.4260], expense: 0 },
-                        { time: "1:15 PM", desc: "Cheonjeyeon Waterfall Hike <span class=\"block text-sm font-normal text-slate-500 mt-1\">Known as 'The Pond of God', this beautiful three-tier waterfall features an arch bridge and diverse flora.</span>", icon: "map-pin", link: "https://www.google.com/maps/search/?api=1&query=Cheonjeyeon+Waterfall+Jeju", latlng: [33.2481, 126.4143], expense: 0 },
-                        { time: "2:30 PM", desc: "Osulloc Tea Museum <span class=\"block text-sm font-normal text-slate-500 mt-1\">Learn about Korea's traditional tea culture while overlooking expansive green tea fields.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Osulloc+Tea+Museum+Jeju", latlng: [33.3058, 126.2893], expense: 0 },
-                        { time: "5:00 PM", desc: "Saebyeol Friends Animal Farm <span class=\"block text-sm font-normal text-slate-500 mt-1\">Get up close with alpacas and other friendly animals in a wide open field.</span>", icon: "camera", link: "https://www.google.com/maps/search/?api=1&query=Saebyeol+Friends+Jeju", latlng: [33.3510, 126.3430], expense: 0 },
-                        { time: "6:00 PM", desc: "Dinner near Airbnb <span class=\"block text-sm font-normal text-slate-500 mt-1\">Ask your Airbnb host for a hidden local gem!</span>", icon: "utensils", latlng: [33.2500, 126.5700], expense: 0 },
-                        { time: "7:00 PM", desc: "Check in @ Airbnb (StayMaritime)", icon: "bed-double", link: "https://www.airbnb.com.sg/rooms/1092988913079421270", latlng: [33.2450, 126.5650], expense: 0 }
-                    ]
-                },
-                // SEOUL
-                {
-                    day: 9, date: "Apr 22 (Wed)", location: "seoul", title: "Hongdae & Hangang",
-                    events: [
-                        { time: "12:00 PM", desc: "Flight from Jeju to Gimpo", icon: "plane-takeoff", latlng: [37.5587, 126.7906], expense: 0 },
-                        { time: "3:30 PM", desc: "Check-in: Mercure Hongdae <span class=\"block text-sm font-normal text-slate-500 mt-1\">Located in the heart of Seoul's youthful, indie music, and arts district.</span>", icon: "bed-double", link: "https://www.google.com/maps/search/?api=1&query=Mercure+Ambassador+Seoul+Hongdae", latlng: [37.5563, 126.9220], expense: 0 },
-                        { time: "4:00 PM", desc: "Hangang Ramyeon @ Yeouinaru <span class=\"block text-sm font-normal text-slate-500 mt-1\">A classic Seoul experience: cooking instant noodles using automated machines by the Han River.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Yeouinaru+Station+Hangang+Park", latlng: [37.5268, 126.9327], expense: 0 },
-                        { time: "5:30 PM", desc: "Sinchon Robinhood Archery Cafe <span class=\"block text-sm font-normal text-slate-500 mt-1\">Try your hand at indoor archery with coaching provided by the staff.</span>", icon: "map-pin", link: "https://www.google.com/maps/search/?api=1&query=Robin+Hood+Archery+Cafe+Sinchon", latlng: [37.5579, 126.9368], expense: 0 },
-                        { time: "7:00 PM", desc: "Dinner @ Sinchon/Hongdae <span class=\"block text-sm font-normal text-slate-500 mt-1\">Endless options for Korean fried chicken, dakgalbi, or KBBQ in this lively university area.</span>", icon: "shopping-bag", link: "https://www.google.com/maps/search/?api=1&query=Hongdae+Seoul", latlng: [37.5563, 126.9237], expense: 0 },
-                        { time: "9:00 PM", desc: "Return to Hotel", icon: "bed-double", expense: 0 }
-                    ]
-                },
-                {
-                    day: 10, date: "Apr 23 (Thu)", location: "seoul", title: "Shopping, Cafes & Pocha",
-                    events: [
-                        { time: "11:00 AM", desc: "WL: Lei Clinic <span class=\"block text-sm font-normal text-slate-500 mt-1\">A popular spot in Apgujeong for modern skincare and aesthetic treatments.</span>", icon: "map-pin", link: "https://www.google.com/maps/search/?api=1&query=Lei+Clinic+Seoul", latlng: [37.5270, 127.0286], expense: 0 },
-                        { 
-                            time: "11:00 AM", 
-                            desc: "Explore Spots & Cafes <span class=\"block text-sm font-normal text-slate-500 mt-1\">Venture through Seoul's trendiest districts for popup stores and cafe hopping.</span>", 
-                            icon: "coffee",
-                            latlng: [37.5219, 127.0234],
-                            expense: 0,
-                            subLinks: [
-                                { name: "Apgujeong Cafe", link: "https://www.google.com/maps/search/?api=1&query=Apgujeong+Cafe+Seoul" },
-                                { name: "Maplestory AGIT", link: "https://www.google.com/maps/search/?api=1&query=Maplestory+AGIT+Seoul" },
-                                { name: "Seongsu Cafe", link: "https://www.google.com/maps/search/?api=1&query=Seongsu+Cafe+Seoul" }
-                            ]
-                        },
-                        { time: "1:00 PM", desc: "Lunch", icon: "utensils", latlng: [37.5260, 127.0280], expense: 0 },
-                        { time: "3:00 PM", desc: "Shopping @ Yongsan iPark Mall <span class=\"block text-sm font-normal text-slate-500 mt-1\">A massive commercial complex great for fashion, electronics, and anime merchandise.</span>", icon: "shopping-bag", link: "https://www.google.com/maps/search/?api=1&query=Yongsan+iPark+Mall+Seoul", latlng: [37.5283, 126.9654], expense: 0 },
-                        { time: "5:00 PM", desc: "Dinner/Drinks @ Jongno 3-ga Pocha Street <span class=\"block text-sm font-normal text-slate-500 mt-1\">Experience authentic Korean nightlife in traditional orange tents (pojangmacha) serving street food and soju.</span>", icon: "utensils", link: "https://www.google.com/maps/search/?api=1&query=Jongno+3-ga+Pocha+Street+Seoul", latlng: [37.5710, 126.9920], expense: 0 },
-                        { time: "7:00 PM", desc: "Lotte Mart Grocery Shopping <span class=\"block text-sm font-normal text-slate-500 mt-1\">The flagship supermarket at Seoul Station—perfect for bulk-buying Korean snacks, ramyeon, and souvenirs.</span>", icon: "shopping-bag", link: "https://www.google.com/maps/search/?api=1&query=Lotte+Mart+Seoul", latlng: [37.5283, 126.9645], expense: 0 },
-                        { time: "9:00 PM", desc: "Return to Hotel", icon: "bed-double", expense: 0 }
-                    ]
-                },
-                {
-                    day: 11, date: "Apr 24 (Fri)", location: "seoul", title: "Departure",
-                    events: [
-                        { time: "10:00 AM", desc: "Haircut <span class=\"block text-sm font-normal text-slate-500 mt-1\">Experience a trendy Korean hair salon in Hongdae before flying back.</span>", icon: "check-circle-2", latlng: [37.5563, 126.9220], expense: 0 },
-                        { time: "10:30 AM", desc: "Hongdae/Yeonnam Cafe Hopping <span class=\"block text-sm font-normal text-slate-500 mt-1\">Stroll along the Gyeongui Line Forest Park and grab a final coffee.</span>", icon: "coffee", link: "https://www.google.com/maps/search/?api=1&query=Yeonnam-dong+Cafes+Seoul", latlng: [37.5621, 126.9228], expense: 0 },
-                        { time: "12:00 PM", desc: "Lunch", icon: "utensils", latlng: [37.5563, 126.9230], expense: 0 },
-                        { time: "2:30 PM", desc: "Check in & Head to Incheon Airport <span class=\"block text-sm font-normal text-slate-500 mt-1\">Take the AREX Airport Railroad straight from Hongik University Station for a seamless trip.</span>", icon: "train", link: "https://www.google.com/maps/search/?api=1&query=Incheon+Airport", latlng: [37.4602, 126.4407], expense: 0 },
-                        { time: "4:45 PM", desc: "Flight Home to Singapore", icon: "plane-takeoff", expense: 0 }
-                    ]
-                }
-            ]
-        };
+        // State Management
+        let users = [];
+        let expenses = [];
 
-        // Static classes mapping for Tailwind
-        const themeStyles = {
-            pink: {
-                btnActive: "bg-pink-500 text-white shadow-md",
-                iconActive: "text-white",
-                iconInactive: "text-pink-500",
-                badge: "bg-pink-100 text-pink-700 border-pink-200",
-                headerGrad: "from-pink-50",
-                textMain: "text-pink-600",
-                timelineIconNode: "border-pink-400 text-pink-500",
-                mapMarker: "#ec4899"
-            },
-            orange: {
-                btnActive: "bg-orange-500 text-white shadow-md",
-                iconActive: "text-white",
-                iconInactive: "text-orange-500",
-                badge: "bg-orange-100 text-orange-700 border-orange-200",
-                headerGrad: "from-orange-50",
-                textMain: "text-orange-600",
-                timelineIconNode: "border-orange-400 text-orange-500",
-                mapMarker: "#f97316"
-            },
-            purple: {
-                btnActive: "bg-purple-500 text-white shadow-md",
-                iconActive: "text-white",
-                iconInactive: "text-purple-500",
-                badge: "bg-purple-100 text-purple-700 border-purple-200",
-                headerGrad: "from-purple-50",
-                textMain: "text-purple-600",
-                timelineIconNode: "border-purple-400 text-purple-500",
-                mapMarker: "#a855f7"
+        // DOM Elements
+        const userForm = document.getElementById('addUserForm');
+        const expenseForm = document.getElementById('addExpenseForm');
+        const userList = document.getElementById('userList');
+        const expensePayerSelect = document.getElementById('expensePayer');
+        const settlementList = document.getElementById('settlementList');
+
+        // Add User Logic
+        userForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('userName');
+            const name = nameInput.value.trim();
+            
+            if (name && !users.includes(name)) {
+                users.push(name);
+                updateUserUI();
+                calculateBalances();
+                nameInput.value = '';
             }
-        };
+        });
 
-        // --- STATE ---
-        let activeFilter = 'all';
-        let openMaps = new Set(); // track which day maps are open
-        let mapInstances = {};   // store Leaflet map instances
-
-        // Load saved expenses from localStorage
-        function loadExpenses() {
-            const saved = localStorage.getItem('travelapp_expenses');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    data.forEach(item => {
-                        const dayData = tripData.itinerary.find(d => d.day === item.day);
-                        if (dayData && dayData.events[item.eventIdx] !== undefined) {
-                            dayData.events[item.eventIdx].expense = item.expense;
-                        }
-                    });
-                } catch(e) { /* ignore parse errors */ }
+        // Add Expense Logic
+        expenseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (users.length === 0) {
+                alert("Please add members to the trip first!");
+                return;
             }
+
+            const desc = document.getElementById('expenseDesc').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const payer = document.getElementById('expensePayer').value;
+
+            expenses.push({ desc, amount, payer });
+            calculateBalances();
+            
+            document.getElementById('expenseDesc').value = '';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expensePayer').value = '';
+        });
+
+        // Update User List & Dropdown
+        function updateUserUI() {
+            userList.innerHTML = '';
+            expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
+            
+            users.forEach(user => {
+                // Update List
+                const li = document.createElement('li');
+                li.textContent = user;
+                userList.appendChild(li);
+
+                // Update Dropdown
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                expensePayerSelect.appendChild(option);
+            });
         }
 
-        function saveExpenses() {
-            const data = [];
-            tripData.itinerary.forEach(day => {
-                day.events.forEach((event, idx) => {
-                    if (event.expense > 0) {
-                        data.push({ day: day.day, eventIdx: idx, expense: event.expense });
+        // The Core Logic: Calculate Balances
+        function calculateBalances() {
+            if (users.length === 0) return;
+
+            // Step 1: Initialize balances to 0
+            let balances = {};
+            users.forEach(user => balances[user] = 0);
+
+            // Step 2: Calculate net balances based on expenses
+            expenses.forEach(exp => {
+                const splitAmount = exp.amount / users.length;
+                
+                // The payer gets credited the full amount
+                balances[exp.payer] += exp.amount;
+                
+                // Everyone (including the payer) gets debited their split share
+                users.forEach(user => {
+                    balances[user] -= splitAmount;
+                });
+            });
+
+            // Step 3: Render the balances to the UI
+            settlementList.innerHTML = '';
+            let isSettled = true;
+
+            for (const [user, balance] of Object.entries(balances)) {
+                if (Math.abs(balance) > 0.01) { // Ignoring tiny rounding errors
+                    isSettled = false;
+                    const li = document.createElement('li');
+                    
+                    if (balance > 0) {
+                        li.innerHTML = `<span>${user}</span> <span class="positive">gets back $${balance.toFixed(2)}</span>`;
+                    } else {
+                        li.innerHTML = `<span>${user}</span> <span class="negative">owes $${Math.abs(balance).toFixed(2)}</span>`;
                     }
-                });
-            });
-            localStorage.setItem('travelapp_expenses', JSON.stringify(data));
-        }
-
-        // Calculate totals
-        function getTotalActivityExpenses() {
-            let total = 0;
-            tripData.itinerary.forEach(day => {
-                day.events.forEach(event => {
-                    total += (event.expense || 0);
-                });
-            });
-            return total;
-        }
-
-        function getDayExpenses(dayNum) {
-            const day = tripData.itinerary.find(d => d.day === dayNum);
-            if (!day) return 0;
-            return day.events.reduce((sum, e) => sum + (e.expense || 0), 0);
-        }
-
-        function getLocationExpenses(locId) {
-            return tripData.itinerary
-                .filter(d => d.location === locId)
-                .reduce((sum, day) => sum + day.events.reduce((s, e) => s + (e.expense || 0), 0), 0);
-        }
-
-        function getBaseBudgetTotal() {
-            return tripData.budget.reduce((sum, b) => sum + b.amount, 0);
-        }
-
-        // --- INIT ---
-        function initApp() {
-            loadExpenses();
-            document.getElementById('header-title').innerText = tripData.overview.title;
-            renderHeaderMeta();
-            createBlossoms();
-            renderApp();
-        }
-
-        function renderHeaderMeta() {
-            const activityTotal = getTotalActivityExpenses();
-            const baseTotal = getBaseBudgetTotal();
-            const grandTotal = baseTotal + activityTotal;
-            document.getElementById('header-meta').innerHTML = `
-                <span class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4"></i> ${tripData.overview.dates}</span>
-                <span class="flex items-center gap-1.5"><i data-lucide="credit-card" class="w-4 h-4"></i> Base: $${baseTotal.toLocaleString()} SGD</span>
-                <span class="flex items-center gap-1.5"><i data-lucide="wallet" class="w-4 h-4"></i> Activities: $${activityTotal.toLocaleString()} SGD</span>
-                <span class="flex items-center gap-1.5 font-bold text-slate-700"><i data-lucide="calculator" class="w-4 h-4"></i> Total: $${grandTotal.toLocaleString()} SGD</span>
-            `;
-            lucide.createIcons({ attrs: { class: ['w-4', 'h-4'] } });
-        }
-
-        // --- BLOSSOM EFFECT ---
-        function createBlossoms() {
-            const container = document.getElementById('blossom-container');
-            const petalCount = 40;
-            for (let i = 0; i < petalCount; i++) {
-                const petal = document.createElement('div');
-                petal.classList.add('petal');
-                const size = Math.random() * 8 + 6;
-                const startLeft = Math.random() * 120 - 10;
-                const duration = Math.random() * 8 + 6;
-                const delay = Math.random() * 10;
-                petal.style.width = `${size}px`;
-                petal.style.height = `${size}px`;
-                petal.style.left = `${startLeft}vw`;
-                petal.style.animationDuration = `${duration}s`;
-                petal.style.animationDelay = `-${delay}s`;
-                container.appendChild(petal);
-            }
-        }
-
-        function setFilter(filterId) {
-            activeFilter = filterId;
-            // Destroy old map instances
-            Object.values(mapInstances).forEach(m => m.remove());
-            mapInstances = {};
-            openMaps.clear();
-            renderApp();
-        }
-
-        // --- RENDER LOGIC ---
-        function renderApp() {
-            renderFilters();
-            
-            let mainHtml = '';
-            
-            if (activeFilter === 'all') {
-                mainHtml += renderBudget();
-            } else {
-                mainHtml += renderHero();
-            }
-
-            mainHtml += renderExpenseSummary();
-            mainHtml += renderTimeline();
-
-            document.getElementById('main-content').innerHTML = mainHtml;
-            renderHeaderMeta();
-            lucide.createIcons();
-        }
-
-        function renderFilters() {
-            const navContainer = document.getElementById('filter-nav');
-            let html = `
-                <button 
-                    onclick="setFilter('all')"
-                    class="px-4 py-2 rounded-full text-sm font-bold transition-colors whitespace-nowrap ${
-                        activeFilter === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }"
-                >
-                    Full Itinerary
-                </button>
-            `;
-
-            tripData.locations.forEach(loc => {
-                const isActive = activeFilter === loc.id;
-                const theme = themeStyles[loc.color];
-                const btnClass = isActive 
-                    ? theme.btnActive 
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50';
-                const iconClass = isActive ? theme.iconActive : theme.iconInactive;
-
-                html += `
-                    <button 
-                        onclick="setFilter('${loc.id}')"
-                        class="px-4 py-2 rounded-full text-sm font-bold transition-colors whitespace-nowrap flex items-center gap-2 ${btnClass}"
-                    >
-                        <i data-lucide="map-pin" class="w-4 h-4 ${iconClass}"></i>
-                        ${loc.name}
-                    </button>
-                `;
-            });
-
-            navContainer.innerHTML = html;
-        }
-
-        function renderBudget() {
-            let html = `
-                <section class="mb-8">
-                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                        <i data-lucide="credit-card" class="text-slate-400 w-6 h-6"></i> Base Estimates
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            `;
-
-            tripData.budget.forEach(item => {
-                html += `
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
-                        <div class="bg-slate-100 p-2.5 rounded-xl text-slate-600">
-                            <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-500 font-medium mb-1">${item.item}</p>
-                            <p class="font-bold text-slate-900">${item.cost}</p>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += `
-                    </div>
-                </section>
-            `;
-            return html;
-        }
-
-        function renderExpenseSummary() {
-            const baseTotal = getBaseBudgetTotal();
-            const activityTotal = getTotalActivityExpenses();
-            const grandTotal = baseTotal + activityTotal;
-
-            // Per-location breakdown
-            let locBreakdown = '';
-            const filteredLocations = activeFilter === 'all' 
-                ? tripData.locations 
-                : tripData.locations.filter(l => l.id === activeFilter);
-
-            filteredLocations.forEach(loc => {
-                const locExp = getLocationExpenses(loc.id);
-                const theme = themeStyles[loc.color];
-                locBreakdown += `
-                    <div class="flex items-center justify-between py-1.5">
-                        <span class="text-sm font-medium ${theme.textMain} flex items-center gap-1.5">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${loc.name}
-                        </span>
-                        <span class="text-sm font-bold text-slate-700">$${locExp.toLocaleString()}</span>
-                    </div>
-                `;
-            });
-
-            const filteredActivityTotal = activeFilter === 'all' 
-                ? activityTotal 
-                : getLocationExpenses(activeFilter);
-
-            return `
-                <section class="mb-8">
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-lg font-bold flex items-center gap-2">
-                                <i data-lucide="wallet" class="text-blue-500 w-5 h-5"></i> Expense Tracker
-                            </h3>
-                            <div class="text-right">
-                                <p class="text-xs text-slate-400">Estimated Activity Spend</p>
-                                <p class="text-2xl font-extrabold text-slate-900">$${filteredActivityTotal.toLocaleString()} <span class="text-sm font-medium text-slate-400">SGD</span></p>
-                            </div>
-                        </div>
-
-                        <div class="w-full bg-slate-100 rounded-full h-3 mb-4 overflow-hidden">
-                            <div class="budget-bar-fill h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600" style="width: ${Math.min((activityTotal / (grandTotal || 1)) * 100, 100)}%"></div>
-                        </div>
-
-                        <div class="border-t border-slate-100 pt-3">
-                            ${locBreakdown}
-                        </div>
-
-                        ${activeFilter === 'all' ? `
-                        <div class="border-t border-slate-200 mt-3 pt-3 flex items-center justify-between">
-                            <span class="text-sm font-bold text-slate-800">Grand Total (Base + Activities)</span>
-                            <span class="text-lg font-extrabold text-slate-900">$${grandTotal.toLocaleString()} SGD</span>
-                        </div>
-                        ` : ''}
-                    </div>
-                </section>
-            `;
-        }
-
-        function renderHero() {
-            const activeLocation = tripData.locations.find(l => l.id === activeFilter);
-            if (!activeLocation) return '';
-
-            return `
-                <div class="w-full h-64 md:h-80 rounded-3xl overflow-hidden mb-8 relative shadow-lg">
-                    <img 
-                        src="${activeLocation.image}" 
-                        alt="${activeLocation.name}"
-                        class="w-full h-full object-cover"
-                    />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
-                        <h2 class="text-4xl font-extrabold text-white">
-                            ${activeLocation.name}
-                        </h2>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderTimeline() {
-            const filteredItinerary = tripData.itinerary.filter(
-                day => activeFilter === 'all' || day.location === activeFilter
-            );
-
-            if (filteredItinerary.length === 0) {
-                return `
-                    <div class="text-center py-20">
-                        <p class="text-slate-500">No events found for this filter.</p>
-                    </div>
-                `;
-            }
-
-            let html = '<div class="space-y-8">';
-
-            filteredItinerary.forEach(day => {
-                const locInfo = tripData.locations.find(l => l.id === day.location);
-                const theme = themeStyles[locInfo.color];
-                const dayExpense = getDayExpenses(day.day);
-                const hasMapPins = day.events.some(e => e.latlng);
-
-                html += `
-                    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r ${theme.headerGrad} to-white">
-                            <div>
-                                <p class="text-sm font-bold ${theme.textMain} mb-1 flex items-center gap-2">
-                                    DAY ${day.day} <span class="text-slate-300">•</span> ${day.date}
-                                </p>
-                                <h3 class="text-xl font-extrabold text-slate-900">${day.title}</h3>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-full flex items-center gap-1.5" data-day-expense="${day.day}">
-                                    <i data-lucide="wallet" class="w-3.5 h-3.5"></i> $${dayExpense}
-                                </span>
-                                ${hasMapPins ? `
-                                <button 
-                                    onclick="toggleMap(${day.day})" 
-                                    class="map-toggle-btn px-3 py-1 rounded-full text-xs font-semibold border ${theme.badge} flex items-center gap-1.5"
-                                    title="Show route map"
-                                >
-                                    <i data-lucide="map" class="w-3.5 h-3.5"></i> Map
-                                </button>
-                                ` : ''}
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold border ${theme.badge}">
-                                    ${locInfo.name}
-                                </span>
-                            </div>
-                        </div>
-
-                        ${hasMapPins ? `
-                        <div id="map-container-${day.day}" class="map-container px-6">
-                            <div id="map-${day.day}" class="day-map"></div>
-                        </div>
-                        ` : ''}
-
-                        <div class="p-6">
-                            <div class="relative border-l-2 border-slate-100 ml-3 space-y-8">
-                `;
-
-                day.events.forEach((event, eventIdx) => {
-                    html += `
-                        <div class="relative pl-8">
-                            <div class="absolute -left-[17px] top-1 bg-white border-2 w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${theme.timelineIconNode}">
-                                <i data-lucide="${event.icon}" class="w-3.5 h-3.5"></i>
-                            </div>
-                            
-                            <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-                                <span class="text-sm font-bold text-slate-400 min-w-[80px] flex items-center gap-1.5 mt-1">
-                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${event.time}
-                                </span>
-                                <div class="flex flex-col flex-1">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <div class="flex flex-col">
-                                            ${event.link 
-                                                ? `<a href="${event.link}" target="_blank" rel="noopener noreferrer" class="text-slate-800 font-medium text-lg leading-tight hover:text-blue-600 transition-colors block">
-                                                    ${event.desc}
-                                                   </a>`
-                                                : `<span class="text-slate-800 font-medium text-lg leading-tight block">${event.desc}</span>`
-                                            }
-                                        </div>
-                                        <div class="flex items-center gap-1 shrink-0 mt-0.5">
-                                            <span class="text-xs text-slate-400">$</span>
-                                            <input 
-                                                type="number" 
-                                                min="0" 
-                                                step="1"
-                                                class="expense-input" 
-                                                value="${event.expense || 0}"
-                                                onchange="updateExpense(${day.day}, ${eventIdx}, this.value)"
-                                                onfocus="this.select()"
-                                                placeholder="0"
-                                            />
-                                        </div>
-                                    </div>
-                                    ${event.subLinks 
-                                        ? `<div class="flex flex-col gap-1.5 mt-2">
-                                            ${event.subLinks.map(sub => `
-                                                <a href="${sub.link}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-slate-500 hover:text-blue-600 hover:underline flex items-center gap-1.5">
-                                                    <i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-slate-400"></i> ${sub.name}
-                                                </a>
-                                            `).join('')}
-                                           </div>`
-                                        : ''
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-                html += `
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += '</div>';
-            return html;
-        }
-
-        // --- EXPENSE UPDATE ---
-        function updateExpense(dayNum, eventIdx, value) {
-            const day = tripData.itinerary.find(d => d.day === dayNum);
-            if (day && day.events[eventIdx] !== undefined) {
-                day.events[eventIdx].expense = Math.max(0, parseInt(value) || 0);
-                saveExpenses();
-                // Update summary without full re-render (to keep map state)
-                renderHeaderMeta();
-                updateExpenseDisplays();
-            }
-        }
-
-        function updateExpenseDisplays() {
-            // Update day expense badges
-            tripData.itinerary.forEach(day => {
-                const dayExpense = getDayExpenses(day.day);
-                const badge = document.querySelector(`[data-day-expense="${day.day}"]`);
-                if (badge) badge.innerHTML = `<i data-lucide="wallet" class="w-3.5 h-3.5"></i> $${dayExpense}`;
-            });
-            
-            // Re-render the expense summary section 
-            const wasOpenMaps = new Set(openMaps);
-            renderApp();
-            
-            // Re-open maps that were open
-            wasOpenMaps.forEach(dayNum => {
-                setTimeout(() => toggleMap(dayNum), 100);
-            });
-        }
-
-        // --- MAP LOGIC ---
-        function toggleMap(dayNum) {
-            const container = document.getElementById(`map-container-${dayNum}`);
-            if (!container) return;
-
-            if (openMaps.has(dayNum)) {
-                // Close map
-                container.classList.remove('open');
-                openMaps.delete(dayNum);
-                if (mapInstances[dayNum]) {
-                    mapInstances[dayNum].remove();
-                    delete mapInstances[dayNum];
+                    settlementList.appendChild(li);
                 }
-            } else {
-                // Open map
-                container.classList.add('open');
-                openMaps.add(dayNum);
-                // Small delay to allow CSS transition to start
-                setTimeout(() => initMap(dayNum), 50);
+            }
+
+            if (isSettled && expenses.length > 0) {
+                settlementList.innerHTML = '<li><em>Everyone is settled up!</em></li>';
+            } else if (expenses.length === 0 && users.length > 0) {
+                 settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
             }
         }
-
-        function initMap(dayNum) {
-            const mapEl = document.getElementById(`map-${dayNum}`);
-            if (!mapEl) return;
-            if (mapInstances[dayNum]) return; // Already initialized
-
-            const day = tripData.itinerary.find(d => d.day === dayNum);
-            if (!day) return;
-
-            const locInfo = tripData.locations.find(l => l.id === day.location);
-            const theme = themeStyles[locInfo.color];
-            const markerColor = theme.mapMarker;
-
-            // Get events with coordinates
-            const eventsWithCoords = day.events.filter(e => e.latlng);
-            if (eventsWithCoords.length === 0) return;
-
-            // Create map
-            const map = L.map(mapEl, { 
-                scrollWheelZoom: false,
-                attributionControl: true
-            });
-            mapInstances[dayNum] = map;
-
-            // Add tile layer (OpenStreetMap)
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 18,
-            }).addTo(map);
-
-            // Custom numbered marker icon
-            function createNumberedIcon(num, color) {
-                return L.divIcon({
-                    className: 'custom-marker',
-                    html: `<div style="
-                        background: ${color};
-                        color: white;
-                        width: 28px;
-                        height: 28px;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-weight: 700;
-                        font-size: 12px;
-                        border: 2px solid white;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                    ">${num}</div>`,
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14],
-                    popupAnchor: [0, -16]
-                });
-            }
-
-            // Add markers
-            const latlngs = [];
-            eventsWithCoords.forEach((event, idx) => {
-                const icon = createNumberedIcon(idx + 1, markerColor);
-                const marker = L.marker(event.latlng, { icon }).addTo(map);
-                marker.bindPopup(`
-                    <div style="min-width: 160px;">
-                        <strong style="font-size: 13px;">${idx + 1}. ${event.desc.replace(/<[^>]*>/g, '')}</strong>
-                        <br><span style="color: #64748b; font-size: 12px;">${event.time}</span>
-                        ${event.expense ? `<br><span style="color: #3b82f6; font-size: 12px; font-weight: 600;">$${event.expense} SGD</span>` : ''}
-                    </div>
-                `);
-                latlngs.push(event.latlng);
-            });
-
-            // Draw route polyline
-            if (latlngs.length > 1) {
-                L.polyline(latlngs, {
-                    color: markerColor,
-                    weight: 3,
-                    opacity: 0.6,
-                    dashArray: '8, 8'
-                }).addTo(map);
-            }
-
-            // Fit bounds
-            if (latlngs.length > 0) {
-                const bounds = L.latLngBounds(latlngs);
-                map.fitBounds(bounds, { padding: [30, 30] });
-            }
-
-            // Force map to resize after transition
-            setTimeout(() => map.invalidateSize(), 400);
-        }
-
-        // Start the application
-        initApp();
     </script>
 </body>
 </html>
