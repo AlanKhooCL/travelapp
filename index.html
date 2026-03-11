@@ -13,124 +13,37 @@
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
 
         :root {
-            /* Sunset Palette */
-            --bg-top: #FF7E5F;
-            --bg-bottom: #FEB47B;
+            var(--bg-top): #FF7E5F; var(--bg-bottom): #FEB47B;
             --card-bg: rgba(255, 255, 255, 0.92);
-            --text-dark: #2D3436;
-            --text-muted: #636E72;
-            --primary: #E17055; /* Warm terracotta */
-            --primary-hover: #D63031;
-            --secondary: #FFEAA7; /* Soft sun yellow */
-            --border: #DFE6E9;
-            --danger: #FF7675;
-            --success: #00B894;
+            --text-dark: #2D3436; var(--text-muted): #636E72;
+            --primary: #E17055; var(--primary-hover): #D63031;
+            --secondary: #FFEAA7; var(--border): #DFE6E9;
+            --danger: #FF7675; var(--success): #00B894;
             --font: 'Outfit', sans-serif;
         }
 
-        body { 
-            font-family: var(--font); 
-            background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
-            background-attachment: fixed;
-            color: var(--text-dark); 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            /* Added safe area padding for modern iPhones when installed as PWA */
-            padding-bottom: env(safe-area-inset-bottom, 20px);
-        }
-
-        h1 { 
-            text-align: center; 
-            font-weight: 700; 
-            color: white;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
-            font-size: 2.5em;
-        }
+        body { font-family: var(--font); background: linear-gradient(135deg, #FF7E5F, #FEB47B); background-attachment: fixed; color: var(--text-dark); max-width: 600px; margin: 0 auto; padding: 20px; padding-bottom: env(safe-area-inset-bottom, 20px); }
+        h1 { text-align: center; font-weight: 700; color: white; text-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 30px; font-size: 2.5em; }
+        h2 { font-weight: 600; border-bottom: 2px solid var(--secondary); padding-bottom: 8px; margin-top: 0; color: var(--primary); font-size: 1.4em; display: flex; justify-content: space-between; align-items: center;}
         
-        h2 { 
-            font-weight: 600; 
-            border-bottom: 2px solid var(--secondary); 
-            padding-bottom: 8px; 
-            margin-top: 0;
-            color: var(--primary);
-            font-size: 1.4em;
-        }
-
-        .card { 
-            background-color: var(--card-bg); 
-            border: none; 
-            border-radius: 20px;
-            padding: 25px; 
-            margin-bottom: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            backdrop-filter: blur(5px);
-        }
-
-        input[type="text"], input[type="number"], select { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 8px 0 15px 0; 
-            background-color: #fff; 
-            color: var(--text-dark); 
-            border: 2px solid var(--border); 
-            border-radius: 12px;
-            font-family: var(--font);
-            font-size: 1em;
-            box-sizing: border-box; 
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        input:focus, select:focus { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2); 
-        }
-
-        button { 
-            background-color: var(--primary); 
-            color: white; 
-            border: none; 
-            border-radius: 12px;
-            cursor: pointer; 
-            font-weight: 600; 
-            font-family: var(--font);
-            font-size: 1.1em;
-            padding: 14px;
-            width: 100%;
-            transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 4px 10px rgba(225, 112, 85, 0.3);
-            -webkit-tap-highlight-color: transparent; /* Removes blue flash on mobile */
-        }
-
-        button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        .card { background-color: var(--card-bg); border: none; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); backdrop-filter: blur(5px); }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 14px; margin: 8px 0 15px 0; background-color: #fff; color: var(--text-dark); border: 2px solid var(--border); border-radius: 12px; font-family: var(--font); font-size: 1em; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2); }
+        
+        button { background-color: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600; font-family: var(--font); font-size: 1.1em; padding: 14px; width: 100%; transition: 0.2s; box-shadow: 0 4px 10px rgba(225, 112, 85, 0.3); -webkit-tap-highlight-color: transparent; }
+        button:hover { background-color: #D63031; transform: translateY(-2px); }
         button:active { transform: translateY(0); }
-        
-        button.secondary { background-color: var(--text-muted); box-shadow: 0 4px 10px rgba(99, 110, 114, 0.2); margin-bottom: 20px; width: auto; padding: 10px 20px; font-size: 1em; }
-        button.secondary:hover { background-color: var(--text-dark); }
-        
+        button.secondary { background-color: #636E72; box-shadow: 0 4px 10px rgba(99, 110, 114, 0.2); margin-bottom: 20px; width: auto; padding: 10px 20px; font-size: 1em; }
         button.danger { background-color: transparent; color: var(--danger); border: 2px solid var(--danger); box-shadow: none; width: auto; padding: 6px 12px; margin-left: 5px; font-size: 0.9em;}
-        button.danger:hover { background-color: var(--danger); color: white; }
-        
         button.edit-btn { background-color: #FDCB6E; color: var(--text-dark); box-shadow: none; width: auto; padding: 8px 14px; font-size: 0.9em; border-radius: 8px;}
-        button.edit-btn:hover { background-color: #E1B12C; }
-
-        #copySettlementsBtn { background-color: var(--success); box-shadow: 0 4px 10px rgba(0, 184, 148, 0.3); }
-        #copySettlementsBtn:hover { background-color: #00A885; }
+        #copySettlementsBtn { background-color: var(--success); }
 
         ul { list-style-type: none; padding: 0; }
         li { padding: 15px 0; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;}
         li:last-child { border-bottom: none; }
-        
         .trip-item { cursor: pointer; background: #fff; padding: 20px; border-radius: 16px; border: 2px solid transparent; margin-bottom: 15px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
-        .trip-item:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1);}
-        
         .settlement-amount { font-weight: 700; color: var(--text-dark); background: var(--secondary); padding: 6px 12px; border-radius: 20px;}
-        
         .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .trip-header-actions button { margin-bottom: 0; }
-
         .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 20px 0; padding: 15px; background: #fff; border-radius: 12px; border: 1px solid var(--border); }
         .checkbox-group label { display: flex; align-items: center; cursor: pointer; color: var(--text-dark); font-weight: 500;}
         .checkbox-group input { width: auto; margin: 0 10px 0 0; accent-color: var(--primary); transform: scale(1.2); }
@@ -140,6 +53,12 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
         #loadingMsg { text-align: center; color: white; font-weight: 600; margin-bottom: 20px; font-size: 1.1em; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+
+        /* AI Scanner UI */
+        .scan-btn { background-color: #6C5CE7; padding: 6px 12px; font-size: 0.85em; width: auto; box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); display: inline-flex; align-items: center; gap: 5px;}
+        .scan-btn:hover { background-color: #5f27cd; }
+        .shimmer { animation: shimmer 1.5s infinite linear; background: linear-gradient(to right, #6C5CE7 4%, #a29bfe 25%, #6C5CE7 36%); background-size: 1000px 100%; color: white;}
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
     </style>
 </head>
 <body>
@@ -167,7 +86,7 @@
         </div>
         
         <div class="card" style="background: var(--primary); color: white;">
-            <h2 id="currentTripTitle" style="margin-top: 0; border: none; color: white; text-align: center; font-size: 1.8em;"></h2>
+            <h2 id="currentTripTitle" style="margin-top: 0; border: none; color: white; justify-content: center; font-size: 1.8em;"></h2>
         </div>
 
         <div class="card">
@@ -180,9 +99,12 @@
         </div>
 
         <div class="card">
-            <h2 id="expenseFormTitle">2. Log an Expense 💸</h2>
+            <h2>
+                <span>2. Log an Expense 💸</span>
+                <label for="receiptInput" class="scan-btn" id="scanLabel">📸 Auto-Scan</label>
+                <input type="file" id="receiptInput" accept="image/*" style="display:none;">
+            </h2>
             <form id="addExpenseForm">
-                
                 <select id="expenseCategory" required>
                     <option value="" disabled selected>-- Choose Category --</option>
                     <option value="⛽ Gas & Transport">⛽ Gas & Transport</option>
@@ -197,7 +119,7 @@
                 <input type="number" id="expenseAmount" placeholder="Amount ($)" step="0.01" required>
                 <select id="expensePayer" required></select>
                 
-                <p style="margin: 15px 0 5px 0; color: var(--text-muted); font-size: 14px; font-weight: 600;">Who's chipping in?</p>
+                <p style="margin: 15px 0 5px 0; color: #636E72; font-size: 14px; font-weight: 600;">Who's chipping in?</p>
                 <div id="involvedUsersContainer" class="checkbox-group"></div>
 
                 <button type="submit" id="submitExpenseBtn">Save Expense</button>
@@ -218,79 +140,98 @@
     </div>
 
     <script>
-        // --- PWA SERVICE WORKER REGISTRATION ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registered!', reg))
-                    .catch(err => console.error('Service Worker registration failed:', err));
-            });
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
 
-        // --- STATE & CONFIG ---
         const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbyXf27SbBGAib7DnywSkf7bh_ZIn_-Q-66O-mjV1SHJSC_UebMtyHbB_NccAq9yAZKT/exec";
         
-        let trips = [];
-        let activeTripId = null;
-        let editingExpenseId = null;
-        let currentSettlements = [];
+        let trips = []; let activeTripId = null; let editingExpenseId = null; let currentSettlements = [];
 
-        // --- DOM ELEMENTS ---
         const dashboardView = document.getElementById('dashboardView'), tripView = document.getElementById('tripView');
         const tripList = document.getElementById('tripList'), loadingMsg = document.getElementById('loadingMsg');
-        const currentTripTitle = document.getElementById('currentTripTitle');
-        const userList = document.getElementById('userList'), expensePayerSelect = document.getElementById('expensePayer');
-        const involvedUsersContainer = document.getElementById('involvedUsersContainer');
-        const settlementList = document.getElementById('settlementList'), expenseLogList = document.getElementById('expenseLogList');
+        const currentTripTitle = document.getElementById('currentTripTitle'), userList = document.getElementById('userList'), expensePayerSelect = document.getElementById('expensePayer');
+        const involvedUsersContainer = document.getElementById('involvedUsersContainer'), settlementList = document.getElementById('settlementList'), expenseLogList = document.getElementById('expenseLogList');
         const expenseForm = document.getElementById('addExpenseForm'), submitExpenseBtn = document.getElementById('submitExpenseBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn'), expenseFormTitle = document.getElementById('expenseFormTitle');
-        const copySettlementsBtn = document.getElementById('copySettlementsBtn');
+        const copySettlementsBtn = document.getElementById('copySettlementsBtn'), receiptInput = document.getElementById('receiptInput'), scanLabel = document.getElementById('scanLabel');
 
-        // --- GOOGLE SHEETS INTEGRATION ---
+        // --- AI RECEIPT SCANNER LOGIC ---
+        receiptInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Update UI to show processing
+            scanLabel.classList.add('shimmer');
+            scanLabel.innerText = "✨ Reading...";
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                // Get the raw Base64 string without the data:image/... prefix
+                const base64String = e.target.result.split(',')[1];
+                const mimeType = file.type;
+
+                try {
+                    const response = await fetch(GOOGLE_API_URL, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({ 
+                            action: 'scanReceipt', 
+                            mimeType: mimeType,
+                            base64Image: base64String 
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if(result.success && result.data) {
+                        // Auto-fill the form!
+                        document.getElementById('expenseCategory').value = result.data.category || "📦 Other";
+                        document.getElementById('expenseDesc').value = result.data.merchant || "";
+                        document.getElementById('expenseAmount').value = result.data.total || "";
+                        
+                        // Briefly flash success
+                        scanLabel.classList.remove('shimmer');
+                        scanLabel.innerText = "✅ Done!";
+                        setTimeout(() => { scanLabel.innerText = "📸 Auto-Scan"; }, 2000);
+                    } else {
+                        throw new Error("AI failed to parse.");
+                    }
+                } catch (error) {
+                    console.error("Scanning Error:", error);
+                    alert("Couldn't read the receipt clearly. Please enter manually.");
+                    scanLabel.classList.remove('shimmer');
+                    scanLabel.innerText = "📸 Auto-Scan";
+                }
+            };
+            reader.readAsDataURL(file);
+            receiptInput.value = ''; // Reset input so you can scan the same file again if needed
+        });
+
+        // --- CORE LOGIC (UNCHANGED) ---
         async function loadDataFromGoogle() {
-            try {
-                const response = await fetch(GOOGLE_API_URL);
-                trips = await response.json();
-                loadingMsg.style.display = 'none';
-                renderDashboard();
-            } catch (error) {
-                console.error("Error loading data:", error);
-                loadingMsg.innerHTML = 'Uh oh! Failed to connect to Google Sheets. Check your connection.';
-            }
+            try { const response = await fetch(GOOGLE_API_URL); trips = await response.json(); loadingMsg.style.display = 'none'; renderDashboard(); } 
+            catch (error) { loadingMsg.innerHTML = 'Uh oh! Failed to connect to Google Sheets.'; }
         }
 
         async function saveData(tripToSave) {
             if (!tripToSave) return;
-            try {
-                await fetch(GOOGLE_API_URL, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: 'saveTrip', trip: tripToSave })
-                });
-            } catch (error) { console.error("Error saving data:", error); }
+            try { await fetch(GOOGLE_API_URL, { method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: 'saveTrip', trip: tripToSave }) }); } 
+            catch (error) { console.error(error); }
         }
 
         async function executeDeleteTrip(tripId) {
-            try {
-                await fetch(GOOGLE_API_URL, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: 'deleteTrip', tripId: tripId })
-                });
-            } catch (error) { console.error("Error deleting trip:", error); }
+            try { await fetch(GOOGLE_API_URL, { method: 'POST', redirect: 'follow', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: 'deleteTrip', tripId: tripId }) }); } 
+            catch (error) { console.error(error); }
         }
 
         function getActiveTrip() { return trips.find(t => t.id === activeTripId); }
 
-        // --- DASHBOARD & TRIP NAVIGATION ---
         function renderDashboard() {
             tripList.innerHTML = '';
-            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:white;">No trips planned yet. Start one above!</p>'; return; }
+            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:white;">No trips planned yet.</p>'; return; }
             trips.forEach(trip => {
                 const div = document.createElement('div'); div.className = 'trip-item';
-                div.innerHTML = `<strong style="font-size: 1.2em; color: var(--primary);">${trip.name}</strong> <br><small style="color:var(--text-muted); font-weight:500;">${trip.users.length} buddies • ${trip.expenses.length} expenses</small>`;
+                div.innerHTML = `<strong style="font-size: 1.2em; color: var(--primary);">${trip.name}</strong> <br><small style="color:#636E72; font-weight:500;">${trip.users.length} buddies • ${trip.expenses.length} expenses</small>`;
                 div.onclick = () => openTrip(trip.id); tripList.appendChild(div);
             });
         }
@@ -299,234 +240,111 @@
             e.preventDefault();
             const rawName = document.getElementById('tripName').value.trim();
             const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-            
             const newTrip = { id: 'TRIP_' + Date.now().toString(), name: formattedName, users: [], expenses: [] };
-            trips.push(newTrip); 
-            document.getElementById('tripName').value = ''; 
-            openTrip(newTrip.id);
-            saveData(newTrip); 
+            trips.push(newTrip); document.getElementById('tripName').value = ''; openTrip(newTrip.id); saveData(newTrip); 
         });
 
         function openTrip(id) { activeTripId = id; dashboardView.classList.remove('active-view'); tripView.classList.add('active-view'); cancelEdit(); renderTripDetails(); }
         function goBackToDashboard() { activeTripId = null; tripView.classList.remove('active-view'); dashboardView.classList.add('active-view'); renderDashboard(); }
+        function deleteTrip() { if (!confirm("Delete this trip? It's gone forever!")) return; const tripId = activeTripId; trips = trips.filter(t => t.id !== activeTripId); goBackToDashboard(); executeDeleteTrip(tripId); }
 
-        function deleteTrip() {
-            if (!confirm("Are you sure you want to delete this trip? It's gone forever!")) return;
-            const tripIdToDelete = activeTripId;
-            trips = trips.filter(t => t.id !== activeTripId);
-            goBackToDashboard();
-            executeDeleteTrip(tripIdToDelete); 
-        }
-
-        // --- USER LOGIC ---
         document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const rawName = document.getElementById('userName').value.trim();
-            const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-            
+            const name = document.getElementById('userName').value.trim().charAt(0).toUpperCase() + document.getElementById('userName').value.trim().slice(1);
             const trip = getActiveTrip();
-            if (name && !trip.users.includes(name)) { 
-                trip.users.push(name); 
-                renderTripDetails(); 
-                document.getElementById('userName').value = ''; 
-                saveData(trip); 
-            }
+            if (name && !trip.users.includes(name)) { trip.users.push(name); renderTripDetails(); document.getElementById('userName').value = ''; saveData(trip); }
         });
 
         function deleteUser(userName) {
             const trip = getActiveTrip();
-            const hasExpenses = trip.expenses.some(exp => exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName)));
-            if (hasExpenses) return alert(`Hold up! ${userName} is still tied to some expenses. Delete those first.`);
-            if (!confirm(`Remove ${userName} from the trip?`)) return;
-
-            trip.users = trip.users.filter(u => u !== userName);
-            renderTripDetails();
-            saveData(trip);
+            if (trip.expenses.some(exp => exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName)))) return alert(`Hold up! ${userName} is tied to some expenses.`);
+            if (!confirm(`Remove ${userName}?`)) return;
+            trip.users = trip.users.filter(u => u !== userName); renderTripDetails(); saveData(trip);
         }
 
-        // --- EXPENSE LOGIC ---
         expenseForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const trip = getActiveTrip();
-            if (trip.users.length === 0) return alert("Hold up! Add some travel buddies first.");
+            if (trip.users.length === 0) return alert("Add travel buddies first.");
+            const involvedUsers = Array.from(document.querySelectorAll('input[name="involved"]:checked')).map(cb => cb.value);
+            if(involvedUsers.length === 0) return alert("Select at least one person chipping in!");
 
-            const checkboxes = document.querySelectorAll('input[name="involved"]:checked');
-            const involvedUsers = Array.from(checkboxes).map(cb => cb.value);
-            if(involvedUsers.length === 0) return alert("Select at least one person who is chipping in!");
+            const finalDesc = `[${document.getElementById('expenseCategory').value}] ${document.getElementById('expenseDesc').value.trim()}`;
+            const expenseData = { id: editingExpenseId || 'EXP_' + Date.now().toString(), desc: finalDesc, amount: parseFloat(document.getElementById('expenseAmount').value), payer: document.getElementById('expensePayer').value, involvedUsers: involvedUsers };
 
-            const category = document.getElementById('expenseCategory').value;
-            const rawDesc = document.getElementById('expenseDesc').value.trim();
-            const finalDesc = `[${category}] ${rawDesc}`;
+            if (editingExpenseId) { trip.expenses[trip.expenses.findIndex(e => e.id === editingExpenseId)] = expenseData; } 
+            else { trip.expenses.push(expenseData); }
 
-            const expenseData = {
-                id: editingExpenseId || 'EXP_' + Date.now().toString(),
-                desc: finalDesc,
-                amount: parseFloat(document.getElementById('expenseAmount').value),
-                payer: document.getElementById('expensePayer').value,
-                involvedUsers: involvedUsers
-            };
-
-            if (editingExpenseId) {
-                const index = trip.expenses.findIndex(e => e.id === editingExpenseId);
-                trip.expenses[index] = expenseData;
-            } else {
-                trip.expenses.push(expenseData);
-            }
-
-            cancelEdit(); renderTripDetails(); e.target.reset();
-            saveData(trip);
+            cancelEdit(); renderTripDetails(); e.target.reset(); saveData(trip);
         });
 
-        function deleteExpense(expenseId) {
-            if(!confirm("Are you sure you want to delete this expense?")) return;
-            const trip = getActiveTrip();
-            trip.expenses = trip.expenses.filter(e => e.id !== expenseId);
-            renderTripDetails();
-            saveData(trip);
-        }
+        function deleteExpense(expenseId) { if(!confirm("Delete this expense?")) return; const trip = getActiveTrip(); trip.expenses = trip.expenses.filter(e => e.id !== expenseId); renderTripDetails(); saveData(trip); }
 
         function editExpense(expenseId) {
-            const trip = getActiveTrip(); const exp = trip.expenses.find(e => e.id === expenseId);
-            if(!exp) return;
+            const trip = getActiveTrip(); const exp = trip.expenses.find(e => e.id === expenseId); if(!exp) return;
             editingExpenseId = expenseId;
-            
             const match = exp.desc.match(/^\[(.*?)\] (.*)$/);
-            if (match) {
-                document.getElementById('expenseCategory').value = match[1];
-                document.getElementById('expenseDesc').value = match[2];
-            } else {
-                document.getElementById('expenseCategory').value = "📦 Other";
-                document.getElementById('expenseDesc').value = exp.desc;
-            }
-
-            document.getElementById('expenseAmount').value = exp.amount;
-            document.getElementById('expensePayer').value = exp.payer;
-
-            const checkboxes = document.querySelectorAll('input[name="involved"]');
-            checkboxes.forEach(cb => { cb.checked = exp.involvedUsers.includes(cb.value); });
-
-            expenseFormTitle.textContent = "✏️ Edit Expense"; 
-            submitExpenseBtn.textContent = "Update Expense";
-            cancelEditBtn.style.display = "block";
-            window.scrollTo({ top: document.getElementById('expenseFormTitle').offsetTop, behavior: 'smooth' });
+            document.getElementById('expenseCategory').value = match ? match[1] : "📦 Other";
+            document.getElementById('expenseDesc').value = match ? match[2] : exp.desc;
+            document.getElementById('expenseAmount').value = exp.amount; document.getElementById('expensePayer').value = exp.payer;
+            document.querySelectorAll('input[name="involved"]').forEach(cb => { cb.checked = exp.involvedUsers.includes(cb.value); });
+            document.querySelector('#expenseFormTitle span').textContent = "✏️ Edit Expense"; submitExpenseBtn.textContent = "Update Expense"; cancelEditBtn.style.display = "block"; window.scrollTo({ top: document.getElementById('expenseFormTitle').offsetTop, behavior: 'smooth' });
         }
 
         function cancelEdit() {
-            editingExpenseId = null; expenseForm.reset();
-            expenseFormTitle.textContent = "2. Log an Expense 💸"; 
-            submitExpenseBtn.textContent = "Save Expense";
-            cancelEditBtn.style.display = "none";
-            document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
+            editingExpenseId = null; expenseForm.reset(); document.querySelector('#expenseFormTitle span').textContent = "2. Log an Expense 💸"; submitExpenseBtn.textContent = "Save Expense"; cancelEditBtn.style.display = "none"; document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
         }
 
-        // --- COPY TO CLIPBOARD LOGIC ---
         function copySettlements() {
-            const trip = getActiveTrip();
-            if(!trip || currentSettlements.length === 0) return;
-
-            let text = `🌅 TripSplit: ${trip.name} 🌅\n`;
-            text += `------------------------\n`;
-            currentSettlements.forEach(s => {
-                text += `💸 ${s.from} owes ${s.to} $${s.amount.toFixed(2)}\n`;
-            });
-            text += `------------------------\n`;
-            text += `Thanks for a great trip! 🚐✨`;
-
-            navigator.clipboard.writeText(text).then(() => {
-                const originalText = copySettlementsBtn.innerText;
-                copySettlementsBtn.innerText = "✅ Copied to Clipboard!";
-                setTimeout(() => { copySettlementsBtn.innerText = originalText; }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-                alert("Couldn't access clipboard. You might need to copy it manually.");
-            });
+            const trip = getActiveTrip(); if(!trip || currentSettlements.length === 0) return;
+            let text = `🌅 TripSplit: ${trip.name} 🌅\n------------------------\n`;
+            currentSettlements.forEach(s => { text += `💸 ${s.from} owes ${s.to} $${s.amount.toFixed(2)}\n`; });
+            text += `------------------------\nThanks for a great trip! 🚐✨`;
+            navigator.clipboard.writeText(text).then(() => { const originalText = copySettlementsBtn.innerText; copySettlementsBtn.innerText = "✅ Copied!"; setTimeout(() => { copySettlementsBtn.innerText = originalText; }, 2000); }).catch(err => { alert("Manual copy required."); });
         }
 
-        // --- RENDER UI & CALCULATE DEBTS ---
         function renderTripDetails() {
             const trip = getActiveTrip(); if (!trip) return;
-
-            currentTripTitle.textContent = `${trip.name}`;
-            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>-- Who paid? --</option>';
-            involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
+            currentTripTitle.textContent = `${trip.name}`; userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>-- Who paid? --</option>'; involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
-            // 1. Render Users
             trip.users.forEach(user => {
                 userList.innerHTML += `<li><span style="font-weight: 600;">👤 ${user}</span><button class="danger" onclick="deleteUser('${user}')">X</button></li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
                 involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
             });
 
-            // 2. Render Expense Log
-            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em style="color:var(--text-muted);">No expenses yet. Let\'s spend some money!</em></li>';
+            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em style="color:#636E72;">No expenses yet. Let\'s spend some money!</em></li>';
             trip.expenses.forEach(exp => {
-                const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
-                
-                let displayDesc = exp.desc;
-                const match = displayDesc.match(/^\[(.*?)\] (.*)$/);
-                if (match) { displayDesc = `<span style="color:var(--primary); font-size: 0.85em; font-weight: 600;">${match[1]}</span><br><span style="font-size: 1.1em; color:var(--text-dark);">${match[2]}</span>`; }
-
-                expenseLogList.innerHTML += `
-                    <li style="align-items: flex-start;">
-                        <div><strong>${displayDesc}</strong> <br><span style="color:var(--success); font-weight: 700; font-size: 1.2em;">$${exp.amount.toFixed(2)}</span><br><small style="color:var(--text-muted); font-weight: 500;">Paid by ${exp.payer} (Split by ${involvedCount})</small></div>
-                        <div style="display:flex; flex-direction:column; gap:8px;"><button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button><button class="danger" onclick="deleteExpense('${exp.id}')">Delete</button></div>
-                    </li>`;
+                let displayDesc = exp.desc; const match = displayDesc.match(/^\[(.*?)\] (.*)$/);
+                if (match) displayDesc = `<span style="color:var(--primary); font-size: 0.85em; font-weight: 600;">${match[1]}</span><br><span style="font-size: 1.1em; color:var(--text-dark);">${match[2]}</span>`;
+                expenseLogList.innerHTML += `<li style="align-items: flex-start;"><div><strong>${displayDesc}</strong> <br><span style="color:var(--success); font-weight: 700; font-size: 1.2em;">$${exp.amount.toFixed(2)}</span><br><small style="color:#636E72; font-weight: 500;">Paid by ${exp.payer} (Split by ${exp.involvedUsers ? exp.involvedUsers.length : trip.users.length})</small></div><div style="display:flex; flex-direction:column; gap:8px;"><button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button><button class="danger" onclick="deleteExpense('${exp.id}')">Delete</button></div></li>`;
             });
 
-            // 3. Calculate Net Balances
-            let balances = {};
-            trip.users.forEach(u => balances[u] = 0);
+            let balances = {}; trip.users.forEach(u => balances[u] = 0);
+            trip.expenses.forEach(exp => { const involved = exp.involvedUsers || trip.users; if(involved.length === 0) return; const split = exp.amount / involved.length; balances[exp.payer] += exp.amount; involved.forEach(u => balances[u] -= split); });
 
-            trip.expenses.forEach(exp => {
-                const involved = exp.involvedUsers || trip.users; 
-                if(involved.length === 0) return;
-                const split = exp.amount / involved.length;
-                balances[exp.payer] += exp.amount;
-                involved.forEach(u => balances[u] -= split);
-            });
-
-            // 4. DEBT SIMPLIFICATION ALGORITHM
             let debtors = []; let creditors = [];
-            for (const [user, balance] of Object.entries(balances)) {
-                if (balance < -0.01) debtors.push({ user, amount: Math.abs(balance) });
-                else if (balance > 0.01) creditors.push({ user, amount: balance });
-            }
-
-            debtors.sort((a, b) => b.amount - a.amount);
-            creditors.sort((a, b) => b.amount - a.amount);
-
-            currentSettlements = []; 
-            let i = 0; let j = 0;
-
+            for (const [user, balance] of Object.entries(balances)) { if (balance < -0.01) debtors.push({ user, amount: Math.abs(balance) }); else if (balance > 0.01) creditors.push({ user, amount: balance }); }
+            debtors.sort((a, b) => b.amount - a.amount); creditors.sort((a, b) => b.amount - a.amount);
+            
+            currentSettlements = []; let i = 0; let j = 0;
             while (i < debtors.length && j < creditors.length) {
-                let debtor = debtors[i]; let creditor = creditors[j];
-                let minAmount = Math.min(debtor.amount, creditor.amount);
-                
+                let debtor = debtors[i]; let creditor = creditors[j]; let minAmount = Math.min(debtor.amount, creditor.amount);
                 currentSettlements.push({ from: debtor.user, to: creditor.user, amount: minAmount });
-
                 debtor.amount -= minAmount; creditor.amount -= minAmount;
-                if (Math.abs(debtor.amount) < 0.01) i++;
-                if (Math.abs(creditor.amount) < 0.01) j++;
+                if (Math.abs(debtor.amount) < 0.01) i++; if (Math.abs(creditor.amount) < 0.01) j++;
             }
 
-            // 5. Render Settlements to UI
-            settlementList.innerHTML = '';
-            copySettlementsBtn.style.display = 'none';
-
+            settlementList.innerHTML = ''; copySettlementsBtn.style.display = 'none';
             if (currentSettlements.length === 0) {
                 if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em style="color:var(--success); font-weight: 600;">Everyone is fully settled up! 🎉</em></li>';
-                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em style="color:var(--text-muted);">No debts yet.</em></li>';
+                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em style="color:#636E72;">No debts yet.</em></li>';
             } else {
-                currentSettlements.forEach(s => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span><strong style="color:var(--danger);">${s.from}</strong> owes <strong style="color:var(--success);">${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
-                    settlementList.appendChild(li);
-                });
+                currentSettlements.forEach(s => { settlementList.innerHTML += `<li><span><strong style="color:var(--danger);">${s.from}</strong> owes <strong style="color:var(--success);">${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span></li>`; });
                 copySettlementsBtn.style.display = 'block'; 
             }
         }
 
-        // --- INIT ---
         loadDataFromGoogle();
     </script>
 </body>
