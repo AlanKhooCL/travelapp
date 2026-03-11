@@ -3,207 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRIPSPLIT_OS</title>
+    <title>TripSplit | Road Trip</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
 
         :root {
-            --bg: #050505;
-            --card-bg: #0a0a0a;
-            --text: #e0e0e0;
-            --border: #333;
-            --primary: #00f3ff;
-            --primary-dim: rgba(0, 243, 255, 0.1);
-            --danger: #ff003c;
-            --danger-dim: rgba(255, 0, 60, 0.1);
-            --success: #00ff88;
-            --font: 'Share Tech Mono', 'Courier New', monospace;
+            /* Sunset Palette */
+            --bg-top: #FF7E5F;
+            --bg-bottom: #FEB47B;
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --text-dark: #2D3436;
+            --text-muted: #636E72;
+            --primary: #E17055; /* Warm terracotta */
+            --primary-hover: #D63031;
+            --secondary: #FFEAA7; /* Soft sun yellow */
+            --border: #DFE6E9;
+            --danger: #FF7675;
+            --success: #00B894;
+            --font: 'Outfit', sans-serif;
         }
 
         body { 
             font-family: var(--font); 
-            background-color: var(--bg); 
-            color: var(--text); 
+            background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
+            background-attachment: fixed;
+            color: var(--text-dark); 
             max-width: 600px; 
             margin: 0 auto; 
             padding: 20px; 
-            background-image: linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
         }
 
         h1 { 
             text-align: center; 
-            font-weight: normal; 
-            letter-spacing: 4px; 
-            color: var(--text);
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
-            margin-bottom: 40px;
+            font-weight: 700; 
+            color: white;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-bottom: 30px;
+            font-size: 2.5em;
         }
         
         h2 { 
-            font-weight: normal; 
-            text-transform: uppercase; 
-            border-bottom: 1px solid var(--border); 
-            padding-bottom: 10px; 
+            font-weight: 600; 
+            border-bottom: 2px solid var(--secondary); 
+            padding-bottom: 8px; 
             margin-top: 0;
-            letter-spacing: 1px;
             color: var(--primary);
+            font-size: 1.4em;
         }
 
         .card { 
             background-color: var(--card-bg); 
-            border: 1px solid var(--border); 
-            padding: 20px; 
+            border: none; 
+            border-radius: 20px;
+            padding: 25px; 
             margin-bottom: 25px; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.8); 
-            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            backdrop-filter: blur(5px);
         }
-
-        /* Sci-fi corner cutouts */
-        .card::before { content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; border-top: 2px solid var(--primary); border-left: 2px solid var(--primary); }
-        .card::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-bottom: 2px solid var(--primary); border-right: 2px solid var(--primary); }
 
         input[type="text"], input[type="number"], select { 
             width: 100%; 
-            padding: 12px; 
+            padding: 14px; 
             margin: 8px 0 15px 0; 
-            background-color: #000; 
-            color: var(--primary); 
-            border: 1px solid var(--border); 
+            background-color: #fff; 
+            color: var(--text-dark); 
+            border: 2px solid var(--border); 
+            border-radius: 12px;
             font-family: var(--font);
+            font-size: 1em;
             box-sizing: border-box; 
             outline: none;
-            transition: 0.3s;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 8px var(--primary-dim); }
+        input:focus, select:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2); 
+        }
 
         button { 
-            background-color: transparent; 
-            color: var(--primary); 
-            border: 1px solid var(--primary); 
+            background-color: var(--primary); 
+            color: white; 
+            border: none; 
+            border-radius: 12px;
             cursor: pointer; 
-            font-weight: bold; 
+            font-weight: 600; 
             font-family: var(--font);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 12px;
+            font-size: 1.1em;
+            padding: 14px;
             width: 100%;
-            transition: 0.2s;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 4px 10px rgba(225, 112, 85, 0.3);
         }
 
-        button:hover { background-color: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-dim); }
+        button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
         
-        button.secondary { color: #aaa; border-color: #555; margin-bottom: 20px; width: auto; padding: 10px 20px; }
-        button.secondary:hover { background-color: #aaa; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        button.secondary { background-color: var(--text-muted); box-shadow: 0 4px 10px rgba(99, 110, 114, 0.2); margin-bottom: 20px; width: auto; padding: 10px 20px; font-size: 1em; }
+        button.secondary:hover { background-color: var(--text-dark); }
         
-        button.danger { color: var(--danger); border-color: var(--danger); width: auto; padding: 5px 10px; margin-left: 5px;}
-        button.danger:hover { background-color: var(--danger); color: #000; box-shadow: 0 0 15px var(--danger-dim); }
+        button.danger { background-color: transparent; color: var(--danger); border: 2px solid var(--danger); box-shadow: none; width: auto; padding: 6px 12px; margin-left: 5px; font-size: 0.9em;}
+        button.danger:hover { background-color: var(--danger); color: white; }
         
-        button.edit-btn { color: #f5a623; border-color: #f5a623; width: auto; padding: 5px 10px; }
-        button.edit-btn:hover { background-color: #f5a623; color: #000; }
+        button.edit-btn { background-color: #FDCB6E; color: var(--text-dark); box-shadow: none; width: auto; padding: 8px 14px; font-size: 0.9em; border-radius: 8px;}
+        button.edit-btn:hover { background-color: #E1B12C; }
 
-        #copySettlementsBtn { border-color: var(--success); color: var(--success); }
-        #copySettlementsBtn:hover { background-color: var(--success); color: #000; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+        #copySettlementsBtn { background-color: var(--success); box-shadow: 0 4px 10px rgba(0, 184, 148, 0.3); }
+        #copySettlementsBtn:hover { background-color: #00A885; }
 
         ul { list-style-type: none; padding: 0; }
-        li { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
+        li { padding: 15px 0; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center;}
         li:last-child { border-bottom: none; }
         
-        .trip-item { cursor: pointer; background: transparent; padding: 15px; border: 1px solid var(--border); margin-bottom: 12px; transition: 0.2s;}
-        .trip-item:hover { border-color: var(--primary); background: var(--primary-dim); }
+        .trip-item { cursor: pointer; background: #fff; padding: 20px; border-radius: 16px; border: 2px solid transparent; margin-bottom: 15px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .trip-item:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1);}
         
-        .settlement-amount { font-weight: bold; color: var(--primary); background: #000; padding: 4px 8px; border: 1px solid var(--primary);}
-        .positive { color: var(--success); }
-        .negative { color: var(--danger); }
+        .settlement-amount { font-weight: 700; color: var(--text-dark); background: var(--secondary); padding: 6px 12px; border-radius: 20px;}
         
         .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .trip-header-actions button { margin-bottom: 0; }
 
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 20px 0; padding: 15px; background: #000; border: 1px solid var(--border); }
-        .checkbox-group label { display: flex; align-items: center; cursor: pointer; color: #aaa; transition: 0.2s;}
-        .checkbox-group label:hover { color: var(--text); }
-        .checkbox-group input { width: auto; margin: 0 10px 0 0; accent-color: var(--primary); }
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 20px 0; padding: 15px; background: #fff; border-radius: 12px; border: 1px solid var(--border); }
+        .checkbox-group label { display: flex; align-items: center; cursor: pointer; color: var(--text-dark); font-weight: 500;}
+        .checkbox-group input { width: auto; margin: 0 10px 0 0; accent-color: var(--primary); transform: scale(1.2); }
         
         .view { display: none; }
-        .active-view { display: block; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .active-view { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        #loadingMsg { text-align: center; color: var(--primary); margin-bottom: 20px; animation: pulse 1.5s infinite;}
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        #loadingMsg { text-align: center; color: white; font-weight: 600; margin-bottom: 20px; font-size: 1.1em; text-shadow: 0 2px 4px rgba(0,0,0,0.2);}
     </style>
 </head>
 <body>
 
-    <h1>TRIPSPLIT_OS //</h1>
+    <h1>🚐 TripSplit</h1>
 
     <div id="dashboardView" class="view active-view">
         <div class="card">
-            <h2>> INITIALIZE_NEW_TRIP</h2>
+            <h2>Start a New Journey</h2>
             <form id="newTripForm">
-                <input type="text" id="tripName" placeholder="ENTER IDENTIFIER (e.g., TOKYO_2026)" required autocomplete="off">
-                <button type="submit">EXECUTE START</button>
+                <input type="text" id="tripName" placeholder="Where to? (e.g., West Coast '26)" required autocomplete="off">
+                <button type="submit">Hit the Road 🗺️</button>
             </form>
         </div>
         
-        <h2>> ACTIVE_DIRECTORIES</h2>
-        <div id="loadingMsg">ESTABLISHING SECURE CONNECTION TO MAINFRAME... ⏳</div>
+        <h2 style="color: white; border-color: rgba(255,255,255,0.3);">Your Adventures</h2>
+        <div id="loadingMsg">Packing the bags... ⏳</div>
         <div id="tripList"></div>
     </div>
 
     <div id="tripView" class="view">
         <div class="trip-header-actions">
-            <button class="secondary" onclick="goBackToDashboard()">[←] RETURN</button>
-            <button class="danger" onclick="deleteTrip()">[X] PURGE DIRECTORY</button>
+            <button class="secondary" onclick="goBackToDashboard()">← Back</button>
+            <button class="danger" onclick="deleteTrip()">Delete Trip 🗑️</button>
         </div>
         
-        <div class="card" style="border-color: var(--primary);">
-            <h2 id="currentTripTitle" style="margin-top: 0; border: none; color: var(--text);"></h2>
+        <div class="card" style="background: var(--primary); color: white;">
+            <h2 id="currentTripTitle" style="margin-top: 0; border: none; color: white; text-align: center; font-size: 1.8em;"></h2>
         </div>
 
         <div class="card">
-            <h2>> 01. SUBJECTS</h2>
+            <h2>1. Travel Buddies 👯</h2>
             <form id="addUserForm">
-                <input type="text" id="userName" placeholder="ENTER SUBJECT ID" required autocomplete="off">
-                <button type="submit">ADD SUBJECT</button>
+                <input type="text" id="userName" placeholder="Who's coming along?" required autocomplete="off">
+                <button type="submit">Add Buddy</button>
             </form>
             <ul id="userList"></ul>
         </div>
 
         <div class="card">
-            <h2 id="expenseFormTitle">> 02. LOG_TRANSACTION</h2>
+            <h2 id="expenseFormTitle">2. Log an Expense 💸</h2>
             <form id="addExpenseForm">
                 
                 <select id="expenseCategory" required>
-                    <option value="" disabled selected>-- SELECT CATEGORY --</option>
-                    <option value="✈️ Transport">✈️ Transport</option>
-                    <option value="🏨 Accommodation">🏨 Accommodation</option>
-                    <option value="🍔 Food & Drink">🍔 Food & Drink</option>
-                    <option value="🎟️ Activities">🎟️ Activities</option>
-                    <option value="🛒 Groceries">🛒 Groceries</option>
-                    <option value="📦 Misc">📦 Misc</option>
+                    <option value="" disabled selected>-- Choose Category --</option>
+                    <option value="⛽ Gas & Transport">⛽ Gas & Transport</option>
+                    <option value="🏕️ Accommodation">🏕️ Accommodation</option>
+                    <option value="🍔 Food & Drinks">🍔 Food & Drinks</option>
+                    <option value="🎟️ Fun Stuff">🎟️ Fun Stuff</option>
+                    <option value="🛒 Snacks/Groceries">🛒 Snacks/Groceries</option>
+                    <option value="📦 Other">📦 Other</option>
                 </select>
 
-                <input type="text" id="expenseDesc" placeholder="TRANSACTION DETAILS" required autocomplete="off">
-                <input type="number" id="expenseAmount" placeholder="AMOUNT (CREDITS)" step="0.01" required>
+                <input type="text" id="expenseDesc" placeholder="What was it for? (e.g., In-N-Out)" required autocomplete="off">
+                <input type="number" id="expenseAmount" placeholder="Amount ($)" step="0.01" required>
                 <select id="expensePayer" required></select>
                 
-                <p style="margin: 15px 0 5px 0; color: #aaa; font-size: 14px;">> SELECT INVOLVED SUBJECTS:</p>
+                <p style="margin: 15px 0 5px 0; color: var(--text-muted); font-size: 14px; font-weight: 600;">Who's chipping in?</p>
                 <div id="involvedUsersContainer" class="checkbox-group"></div>
 
-                <button type="submit" id="submitExpenseBtn">PROCESS TRANSACTION</button>
-                <button type="button" class="secondary" id="cancelEditBtn" style="display:none; width: 100%; margin-top: 8px;" onclick="cancelEdit()">ABORT OVERRIDE</button>
+                <button type="submit" id="submitExpenseBtn">Save Expense</button>
+                <button type="button" class="secondary" id="cancelEditBtn" style="display:none; width: 100%; margin-top: 8px;" onclick="cancelEdit()">Cancel Edit</button>
             </form>
         </div>
 
         <div class="card">
-            <h2>> 03. RESOLUTION_PROTOCOL</h2>
+            <h2>3. Settle Up 🤝</h2>
             <ul id="settlementList"></ul>
-            <button id="copySettlementsBtn" class="secondary" style="display:none; width: 100%; margin-top: 15px;" onclick="copySettlements()">[📋] EXPORT DIRECTIVES</button>
+            <button id="copySettlementsBtn" class="secondary" style="display:none; width: 100%; margin-top: 15px;" onclick="copySettlements()">📋 Copy for the Group Chat</button>
         </div>
 
         <div class="card">
-            <h2>> DATABASE_LOG</h2>
+            <h2>Expense History 📜</h2>
             <ul id="expenseLogList"></ul>
         </div>
     </div>
@@ -237,7 +238,7 @@
                 renderDashboard();
             } catch (error) {
                 console.error("Error loading data:", error);
-                loadingMsg.innerHTML = '<span style="color:var(--danger);">[ERROR] CONNECTION TERMINATED.</span>';
+                loadingMsg.innerHTML = 'Uh oh! Failed to connect to Google Sheets. Check your connection.';
             }
         }
 
@@ -269,17 +270,21 @@
         // --- DASHBOARD & TRIP NAVIGATION ---
         function renderDashboard() {
             tripList.innerHTML = '';
-            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:#555;">NO DIRECTORIES FOUND.</p>'; return; }
+            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:white;">No trips planned yet. Start one above!</p>'; return; }
             trips.forEach(trip => {
                 const div = document.createElement('div'); div.className = 'trip-item';
-                div.innerHTML = `<strong style="color:var(--primary);">> ${trip.name}</strong> <br><small style="color:#888;">SUBJECTS: ${trip.users.length} | LOGS: ${trip.expenses.length}</small>`;
+                div.innerHTML = `<strong style="font-size: 1.2em; color: var(--primary);">${trip.name}</strong> <br><small style="color:var(--text-muted); font-weight:500;">${trip.users.length} buddies • ${trip.expenses.length} expenses</small>`;
                 div.onclick = () => openTrip(trip.id); tripList.appendChild(div);
             });
         }
 
         document.getElementById('newTripForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const newTrip = { id: 'TRIP_' + Date.now().toString(), name: document.getElementById('tripName').value.trim().toUpperCase(), users: [], expenses: [] };
+            // Capitalize first letters nicely
+            const rawName = document.getElementById('tripName').value.trim();
+            const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+            
+            const newTrip = { id: 'TRIP_' + Date.now().toString(), name: formattedName, users: [], expenses: [] };
             trips.push(newTrip); 
             document.getElementById('tripName').value = ''; 
             openTrip(newTrip.id);
@@ -290,7 +295,7 @@
         function goBackToDashboard() { activeTripId = null; tripView.classList.remove('active-view'); dashboardView.classList.add('active-view'); renderDashboard(); }
 
         function deleteTrip() {
-            if (!confirm("WARNING: PURGING DIRECTORY IS IRREVERSIBLE. PROCEED?")) return;
+            if (!confirm("Are you sure you want to delete this trip? It's gone forever!")) return;
             const tripIdToDelete = activeTripId;
             trips = trips.filter(t => t.id !== activeTripId);
             goBackToDashboard();
@@ -300,7 +305,9 @@
         // --- USER LOGIC ---
         document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById('userName').value.trim().toUpperCase();
+            const rawName = document.getElementById('userName').value.trim();
+            const name = rawName.charAt(0).toUpperCase() + rawName.slice(1); // Capitalize
+            
             const trip = getActiveTrip();
             if (name && !trip.users.includes(name)) { 
                 trip.users.push(name); 
@@ -313,8 +320,8 @@
         function deleteUser(userName) {
             const trip = getActiveTrip();
             const hasExpenses = trip.expenses.some(exp => exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName)));
-            if (hasExpenses) return alert(`ACCESS DENIED: ${userName} IS TIED TO EXISTING LOGS.`);
-            if (!confirm(`PURGE SUBJECT ${userName}?`)) return;
+            if (hasExpenses) return alert(`Hold up! ${userName} is still tied to some expenses. Delete those first.`);
+            if (!confirm(`Remove ${userName} from the trip?`)) return;
 
             trip.users = trip.users.filter(u => u !== userName);
             renderTripDetails();
@@ -325,13 +332,13 @@
         expenseForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const trip = getActiveTrip();
-            if (trip.users.length === 0) return alert("SYSTEM ERROR: NO SUBJECTS FOUND.");
+            if (trip.users.length === 0) return alert("Hold up! Add some travel buddies first.");
 
             const checkboxes = document.querySelectorAll('input[name="involved"]:checked');
             const involvedUsers = Array.from(checkboxes).map(cb => cb.value);
-            if(involvedUsers.length === 0) return alert("SYSTEM ERROR: SELECT INVOLVED SUBJECTS.");
+            if(involvedUsers.length === 0) return alert("Select at least one person who is chipping in!");
 
-            // MERGE CATEGORY AND DESCRIPTION FOR BACKEND COMPATIBILITY
+            // MERGE CATEGORY AND DESCRIPTION
             const category = document.getElementById('expenseCategory').value;
             const rawDesc = document.getElementById('expenseDesc').value.trim();
             const finalDesc = `[${category}] ${rawDesc}`;
@@ -356,7 +363,7 @@
         });
 
         function deleteExpense(expenseId) {
-            if(!confirm("CONFIRM DELETION OF TRANSACTION LOG?")) return;
+            if(!confirm("Are you sure you want to delete this expense?")) return;
             const trip = getActiveTrip();
             trip.expenses = trip.expenses.filter(e => e.id !== expenseId);
             renderTripDetails();
@@ -374,7 +381,7 @@
                 document.getElementById('expenseCategory').value = match[1];
                 document.getElementById('expenseDesc').value = match[2];
             } else {
-                document.getElementById('expenseCategory').value = "📦 Misc"; // Fallback for old data
+                document.getElementById('expenseCategory').value = "📦 Other"; // Fallback
                 document.getElementById('expenseDesc').value = exp.desc;
             }
 
@@ -384,16 +391,16 @@
             const checkboxes = document.querySelectorAll('input[name="involved"]');
             checkboxes.forEach(cb => { cb.checked = exp.involvedUsers.includes(cb.value); });
 
-            expenseFormTitle.textContent = "> 02. OVERRIDE_TRANSACTION"; 
-            submitExpenseBtn.textContent = "EXECUTE OVERRIDE";
+            expenseFormTitle.textContent = "✏️ Edit Expense"; 
+            submitExpenseBtn.textContent = "Update Expense";
             cancelEditBtn.style.display = "block";
             window.scrollTo({ top: document.getElementById('expenseFormTitle').offsetTop, behavior: 'smooth' });
         }
 
         function cancelEdit() {
             editingExpenseId = null; expenseForm.reset();
-            expenseFormTitle.textContent = "> 02. LOG_TRANSACTION"; 
-            submitExpenseBtn.textContent = "PROCESS TRANSACTION";
+            expenseFormTitle.textContent = "2. Log an Expense 💸"; 
+            submitExpenseBtn.textContent = "Save Expense";
             cancelEditBtn.style.display = "none";
             document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
         }
@@ -403,22 +410,21 @@
             const trip = getActiveTrip();
             if(!trip || currentSettlements.length === 0) return;
 
-            let text = `[ TRIPSPLIT_OS REPORT ]\n`;
-            text += `DIR: ${trip.name}\n`;
-            text += `========================\n`;
+            let text = `🌅 TripSplit: ${trip.name} 🌅\n`;
+            text += `------------------------\n`;
             currentSettlements.forEach(s => {
-                text += `> ${s.from} TO TRANSFER $${s.amount.toFixed(2)} TO ${s.to}\n`;
+                text += `💸 ${s.from} owes ${s.to} $${s.amount.toFixed(2)}\n`;
             });
-            text += `========================\n`;
-            text += `SYSTEM NOMINAL.`;
+            text += `------------------------\n`;
+            text += `Thanks for a great trip! 🚐✨`;
 
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = copySettlementsBtn.innerText;
-                copySettlementsBtn.innerText = "[✅] DATA EXPORTED";
+                copySettlementsBtn.innerText = "✅ Copied to Clipboard!";
                 setTimeout(() => { copySettlementsBtn.innerText = originalText; }, 2000);
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
-                alert("ACCESS DENIED TO CLIPBOARD.");
+                alert("Couldn't access clipboard. You might need to copy it manually.");
             });
         }
 
@@ -426,31 +432,31 @@
         function renderTripDetails() {
             const trip = getActiveTrip(); if (!trip) return;
 
-            currentTripTitle.innerHTML = `> DIR: <span style="color:var(--primary);">${trip.name}</span>`;
-            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>-- SELECT PAYER --</option>';
+            currentTripTitle.textContent = `${trip.name}`;
+            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>-- Who paid? --</option>';
             involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
             // 1. Render Users
             trip.users.forEach(user => {
-                userList.innerHTML += `<li><span><span style="color:#555;">ID_</span>${user}</span><button class="danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser('${user}')">PURGE</button></li>`;
+                userList.innerHTML += `<li><span style="font-weight: 600;">👤 ${user}</span><button class="danger" onclick="deleteUser('${user}')">X</button></li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
                 involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
             });
 
             // 2. Render Expense Log
-            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em style="color:#555;">NO LOGS DETECTED.</em></li>';
+            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em style="color:var(--text-muted);">No expenses yet. Let\'s spend some money!</em></li>';
             trip.expenses.forEach(exp => {
                 const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
                 
-                // Make the category pop slightly if it exists
+                // Format the category display
                 let displayDesc = exp.desc;
                 const match = displayDesc.match(/^\[(.*?)\] (.*)$/);
-                if (match) { displayDesc = `<span style="color:var(--primary); font-size: 12px;">[${match[1]}]</span><br>${match[2]}`; }
+                if (match) { displayDesc = `<span style="color:var(--primary); font-size: 0.85em; font-weight: 600;">${match[1]}</span><br><span style="font-size: 1.1em; color:var(--text-dark);">${match[2]}</span>`; }
 
                 expenseLogList.innerHTML += `
                     <li style="align-items: flex-start;">
-                        <div><strong style="color:#fff;">${displayDesc}</strong> <br><span style="color:var(--success); font-size: 18px;">$${exp.amount.toFixed(2)}</span><br><small style="color:#888;">CREDITOR: ${exp.payer} (SPLIT: ${involvedCount})</small></div>
-                        <div style="display:flex; flex-direction:column; gap:5px;"><button class="edit-btn" onclick="editExpense('${exp.id}')">EDIT</button><button class="danger" onclick="deleteExpense('${exp.id}')">DEL</button></div>
+                        <div><strong>${displayDesc}</strong> <br><span style="color:var(--success); font-weight: 700; font-size: 1.2em;">$${exp.amount.toFixed(2)}</span><br><small style="color:var(--text-muted); font-weight: 500;">Paid by ${exp.payer} (Split by ${involvedCount})</small></div>
+                        <div style="display:flex; flex-direction:column; gap:8px;"><button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button><button class="danger" onclick="deleteExpense('${exp.id}')">Delete</button></div>
                     </li>`;
             });
 
@@ -495,12 +501,12 @@
             copySettlementsBtn.style.display = 'none';
 
             if (currentSettlements.length === 0) {
-                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em style="color:var(--success);">STATUS: ALL ACCOUNTS SETTLED.</em></li>';
-                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em style="color:#555;">STATUS: AWAITING TRANSACTION DATA.</em></li>';
+                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em style="color:var(--success); font-weight: 600;">Everyone is fully settled up! 🎉</em></li>';
+                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em style="color:var(--text-muted);">No debts yet.</em></li>';
             } else {
                 currentSettlements.forEach(s => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<span><strong style="color:var(--danger);">${s.from}</strong> <span style="color:#888;">→</span> <strong style="color:var(--success);">${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
+                    li.innerHTML = `<span><strong style="color:var(--danger);">${s.from}</strong> owes <strong style="color:var(--success);">${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
                     settlementList.appendChild(li);
                 });
                 copySettlementsBtn.style.display = 'block'; 
