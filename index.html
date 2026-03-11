@@ -3,111 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Expense Splitter</title>
+    <title>TRIPSPLIT_OS</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
         :root {
-            --primary: #4F46E5;
-            --bg: #F9FAFB;
-            --card-bg: #FFFFFF;
-            --text: #111827;
-            --border: #E5E7EB;
-            --danger: #DC2626;
-            --success: #059669;
+            --bg: #050505;
+            --card-bg: #0a0a0a;
+            --text: #e0e0e0;
+            --border: #333;
+            --primary: #00f3ff;
+            --primary-dim: rgba(0, 243, 255, 0.1);
+            --danger: #ff003c;
+            --danger-dim: rgba(255, 0, 60, 0.1);
+            --success: #00ff88;
+            --font: 'Share Tech Mono', 'Courier New', monospace;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); max-width: 600px; margin: 0 auto; padding: 20px; }
-        h1, h2 { text-align: center; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input[type="text"], input[type="number"], select, button { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
-        button { background-color: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s;}
-        button:hover { background-color: #4338CA; }
-        button.secondary { background-color: #6B7280; margin-bottom: 20px; width: auto; padding: 10px 20px; }
-        button.danger { background-color: var(--danger); width: auto; padding: 5px 10px; margin-left: 5px;}
-        button.danger:hover { background-color: #B91C1C; }
-        button.edit-btn { background-color: #F59E0B; width: auto; padding: 5px 10px; }
+
+        body { 
+            font-family: var(--font); 
+            background-color: var(--bg); 
+            color: var(--text); 
+            max-width: 600px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-image: linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        h1 { 
+            text-align: center; 
+            font-weight: normal; 
+            letter-spacing: 4px; 
+            color: var(--text);
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            margin-bottom: 40px;
+        }
+        
+        h2 { 
+            font-weight: normal; 
+            text-transform: uppercase; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 10px; 
+            margin-top: 0;
+            letter-spacing: 1px;
+            color: var(--primary);
+        }
+
+        .card { 
+            background-color: var(--card-bg); 
+            border: 1px solid var(--border); 
+            padding: 20px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.8); 
+            position: relative;
+        }
+
+        /* Sci-fi corner cutouts */
+        .card::before { content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px; border-top: 2px solid var(--primary); border-left: 2px solid var(--primary); }
+        .card::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-bottom: 2px solid var(--primary); border-right: 2px solid var(--primary); }
+
+        input[type="text"], input[type="number"], select { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0 15px 0; 
+            background-color: #000; 
+            color: var(--primary); 
+            border: 1px solid var(--border); 
+            font-family: var(--font);
+            box-sizing: border-box; 
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 8px var(--primary-dim); }
+
+        button { 
+            background-color: transparent; 
+            color: var(--primary); 
+            border: 1px solid var(--primary); 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-family: var(--font);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        button:hover { background-color: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-dim); }
+        
+        button.secondary { color: #aaa; border-color: #555; margin-bottom: 20px; width: auto; padding: 10px 20px; }
+        button.secondary:hover { background-color: #aaa; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        
+        button.danger { color: var(--danger); border-color: var(--danger); width: auto; padding: 5px 10px; margin-left: 5px;}
+        button.danger:hover { background-color: var(--danger); color: #000; box-shadow: 0 0 15px var(--danger-dim); }
+        
+        button.edit-btn { color: #f5a623; border-color: #f5a623; width: auto; padding: 5px 10px; }
+        button.edit-btn:hover { background-color: #f5a623; color: #000; }
+
+        #copySettlementsBtn { border-color: var(--success); color: var(--success); }
+        #copySettlementsBtn:hover { background-color: var(--success); color: #000; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+
         ul { list-style-type: none; padding: 0; }
-        li { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
+        li { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;}
         li:last-child { border-bottom: none; }
-        .trip-item { cursor: pointer; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; transition: 0.2s;}
-        .trip-item:hover { border-color: var(--primary); }
-        .settlement-amount { font-weight: bold; color: var(--text); background: #E5E7EB; padding: 4px 8px; border-radius: 4px;}
+        
+        .trip-item { cursor: pointer; background: transparent; padding: 15px; border: 1px solid var(--border); margin-bottom: 12px; transition: 0.2s;}
+        .trip-item:hover { border-color: var(--primary); background: var(--primary-dim); }
+        
+        .settlement-amount { font-weight: bold; color: var(--primary); background: #000; padding: 4px 8px; border: 1px solid var(--primary);}
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
         
         .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .trip-header-actions button { margin-bottom: 0; }
 
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; padding: 10px; background: var(--bg); border-radius: 4px;}
-        .checkbox-group label { display: flex; align-items: center; cursor: pointer; }
-        .checkbox-group input { width: auto; margin: 0 8px 0 0; }
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0 20px 0; padding: 15px; background: #000; border: 1px solid var(--border); }
+        .checkbox-group label { display: flex; align-items: center; cursor: pointer; color: #aaa; transition: 0.2s;}
+        .checkbox-group label:hover { color: var(--text); }
+        .checkbox-group input { width: auto; margin: 0 10px 0 0; accent-color: var(--primary); }
         
         .view { display: none; }
-        .active-view { display: block; }
-        #loadingMsg { text-align: center; color: #6B7280; font-style: italic; margin-bottom: 20px;}
+        .active-view { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #loadingMsg { text-align: center; color: var(--primary); margin-bottom: 20px; animation: pulse 1.5s infinite;}
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-    <h1>✈️ TripSplit</h1>
+    <h1>TRIPSPLIT_OS //</h1>
 
     <div id="dashboardView" class="view active-view">
         <div class="card">
-            <h2>Create New Trip</h2>
+            <h2>> INITIALIZE_NEW_TRIP</h2>
             <form id="newTripForm">
-                <input type="text" id="tripName" placeholder="Trip Name (e.g., Tokyo 2026)" required>
-                <button type="submit">Start Trip</button>
+                <input type="text" id="tripName" placeholder="ENTER IDENTIFIER (e.g., TOKYO_2026)" required autocomplete="off">
+                <button type="submit">EXECUTE START</button>
             </form>
         </div>
         
-        <h2>Your Trips</h2>
-        <div id="loadingMsg">Fetching trips from Google Sheets... ⏳</div>
+        <h2>> ACTIVE_DIRECTORIES</h2>
+        <div id="loadingMsg">ESTABLISHING SECURE CONNECTION TO MAINFRAME... ⏳</div>
         <div id="tripList"></div>
     </div>
 
     <div id="tripView" class="view">
         <div class="trip-header-actions">
-            <button class="secondary" onclick="goBackToDashboard()">← Back</button>
-            <button class="danger" onclick="deleteTrip()">Delete Trip</button>
+            <button class="secondary" onclick="goBackToDashboard()">[←] RETURN</button>
+            <button class="danger" onclick="deleteTrip()">[X] PURGE DIRECTORY</button>
         </div>
         
-        <h2 id="currentTripTitle" style="margin-top: 0;">Trip Details</h2>
+        <div class="card" style="border-color: var(--primary);">
+            <h2 id="currentTripTitle" style="margin-top: 0; border: none; color: var(--text);"></h2>
+        </div>
 
         <div class="card">
-            <h2>1. Members</h2>
+            <h2>> 01. SUBJECTS</h2>
             <form id="addUserForm">
-                <input type="text" id="userName" placeholder="Enter name" required>
-                <button type="submit">Add Member</button>
+                <input type="text" id="userName" placeholder="ENTER SUBJECT ID" required autocomplete="off">
+                <button type="submit">ADD SUBJECT</button>
             </form>
             <ul id="userList"></ul>
         </div>
 
         <div class="card">
-            <h2 id="expenseFormTitle">2. Add Expense</h2>
+            <h2 id="expenseFormTitle">> 02. LOG_TRANSACTION</h2>
             <form id="addExpenseForm">
-                <input type="text" id="expenseDesc" placeholder="What was it for?" required>
-                <input type="number" id="expenseAmount" placeholder="Amount ($)" step="0.01" required>
+                
+                <select id="expenseCategory" required>
+                    <option value="" disabled selected>-- SELECT CATEGORY --</option>
+                    <option value="✈️ Transport">✈️ Transport</option>
+                    <option value="🏨 Accommodation">🏨 Accommodation</option>
+                    <option value="🍔 Food & Drink">🍔 Food & Drink</option>
+                    <option value="🎟️ Activities">🎟️ Activities</option>
+                    <option value="🛒 Groceries">🛒 Groceries</option>
+                    <option value="📦 Misc">📦 Misc</option>
+                </select>
+
+                <input type="text" id="expenseDesc" placeholder="TRANSACTION DETAILS" required autocomplete="off">
+                <input type="number" id="expenseAmount" placeholder="AMOUNT (CREDITS)" step="0.01" required>
                 <select id="expensePayer" required></select>
                 
-                <p style="margin: 15px 0 5px 0; font-weight: bold; font-size: 14px;">Who was involved?</p>
+                <p style="margin: 15px 0 5px 0; color: #aaa; font-size: 14px;">> SELECT INVOLVED SUBJECTS:</p>
                 <div id="involvedUsersContainer" class="checkbox-group"></div>
 
-                <button type="submit" id="submitExpenseBtn">Record Expense</button>
-                <button type="button" class="secondary" id="cancelEditBtn" style="display:none; width: 100%; margin-top: 8px;" onclick="cancelEdit()">Cancel Edit</button>
+                <button type="submit" id="submitExpenseBtn">PROCESS TRANSACTION</button>
+                <button type="button" class="secondary" id="cancelEditBtn" style="display:none; width: 100%; margin-top: 8px;" onclick="cancelEdit()">ABORT OVERRIDE</button>
             </form>
         </div>
 
         <div class="card">
-            <h2>3. How to Settle Up</h2>
+            <h2>> 03. RESOLUTION_PROTOCOL</h2>
             <ul id="settlementList"></ul>
-            <button id="copySettlementsBtn" class="secondary" style="display:none; width: 100%; margin-top: 15px; background-color: #10B981; color: white;" onclick="copySettlements()">📋 Copy Settlements to Clipboard</button>
+            <button id="copySettlementsBtn" class="secondary" style="display:none; width: 100%; margin-top: 15px;" onclick="copySettlements()">[📋] EXPORT DIRECTIVES</button>
         </div>
 
         <div class="card">
-            <h2>Expense Log</h2>
+            <h2>> DATABASE_LOG</h2>
             <ul id="expenseLogList"></ul>
         </div>
     </div>
 
     <script>
         // --- STATE & CONFIG ---
-        // 👉 Using your newly provided Google Apps Script URL
         const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbyXf27SbBGAib7DnywSkf7bh_ZIn_-Q-66O-mjV1SHJSC_UebMtyHbB_NccAq9yAZKT/exec";
         
         let trips = [];
@@ -135,7 +237,7 @@
                 renderDashboard();
             } catch (error) {
                 console.error("Error loading data:", error);
-                loadingMsg.innerHTML = '<span style="color:red;">Failed to connect to Google Sheets. Check console.</span>';
+                loadingMsg.innerHTML = '<span style="color:var(--danger);">[ERROR] CONNECTION TERMINATED.</span>';
             }
         }
 
@@ -148,10 +250,7 @@
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ action: 'saveTrip', trip: tripToSave })
                 });
-                console.log("Saved to Google Sheets!");
-            } catch (error) {
-                console.error("Error saving data:", error);
-            }
+            } catch (error) { console.error("Error saving data:", error); }
         }
 
         async function executeDeleteTrip(tripId) {
@@ -162,9 +261,7 @@
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ action: 'deleteTrip', tripId: tripId })
                 });
-            } catch (error) {
-                console.error("Error deleting trip:", error);
-            }
+            } catch (error) { console.error("Error deleting trip:", error); }
         }
 
         function getActiveTrip() { return trips.find(t => t.id === activeTripId); }
@@ -172,17 +269,17 @@
         // --- DASHBOARD & TRIP NAVIGATION ---
         function renderDashboard() {
             tripList.innerHTML = '';
-            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:#6B7280;">No trips yet.</p>'; return; }
+            if (trips.length === 0) { tripList.innerHTML = '<p style="text-align:center; color:#555;">NO DIRECTORIES FOUND.</p>'; return; }
             trips.forEach(trip => {
                 const div = document.createElement('div'); div.className = 'trip-item';
-                div.innerHTML = `<strong>${trip.name}</strong> <br><small>${trip.users.length} members • ${trip.expenses.length} expenses</small>`;
+                div.innerHTML = `<strong style="color:var(--primary);">> ${trip.name}</strong> <br><small style="color:#888;">SUBJECTS: ${trip.users.length} | LOGS: ${trip.expenses.length}</small>`;
                 div.onclick = () => openTrip(trip.id); tripList.appendChild(div);
             });
         }
 
         document.getElementById('newTripForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const newTrip = { id: 'TRIP_' + Date.now().toString(), name: document.getElementById('tripName').value.trim(), users: [], expenses: [] };
+            const newTrip = { id: 'TRIP_' + Date.now().toString(), name: document.getElementById('tripName').value.trim().toUpperCase(), users: [], expenses: [] };
             trips.push(newTrip); 
             document.getElementById('tripName').value = ''; 
             openTrip(newTrip.id);
@@ -193,7 +290,7 @@
         function goBackToDashboard() { activeTripId = null; tripView.classList.remove('active-view'); dashboardView.classList.add('active-view'); renderDashboard(); }
 
         function deleteTrip() {
-            if (!confirm("Are you sure you want to delete this entire trip? This cannot be undone.")) return;
+            if (!confirm("WARNING: PURGING DIRECTORY IS IRREVERSIBLE. PROCEED?")) return;
             const tripIdToDelete = activeTripId;
             trips = trips.filter(t => t.id !== activeTripId);
             goBackToDashboard();
@@ -203,7 +300,7 @@
         // --- USER LOGIC ---
         document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const name = document.getElementById('userName').value.trim();
+            const name = document.getElementById('userName').value.trim().toUpperCase();
             const trip = getActiveTrip();
             if (name && !trip.users.includes(name)) { 
                 trip.users.push(name); 
@@ -216,8 +313,8 @@
         function deleteUser(userName) {
             const trip = getActiveTrip();
             const hasExpenses = trip.expenses.some(exp => exp.payer === userName || (exp.involvedUsers && exp.involvedUsers.includes(userName)));
-            if (hasExpenses) return alert(`Cannot remove ${userName}. They are involved in existing expenses.`);
-            if (!confirm(`Remove ${userName} from the trip?`)) return;
+            if (hasExpenses) return alert(`ACCESS DENIED: ${userName} IS TIED TO EXISTING LOGS.`);
+            if (!confirm(`PURGE SUBJECT ${userName}?`)) return;
 
             trip.users = trip.users.filter(u => u !== userName);
             renderTripDetails();
@@ -228,15 +325,20 @@
         expenseForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const trip = getActiveTrip();
-            if (trip.users.length === 0) return alert("Add members first!");
+            if (trip.users.length === 0) return alert("SYSTEM ERROR: NO SUBJECTS FOUND.");
 
             const checkboxes = document.querySelectorAll('input[name="involved"]:checked');
             const involvedUsers = Array.from(checkboxes).map(cb => cb.value);
-            if(involvedUsers.length === 0) return alert("Select at least one involved user!");
+            if(involvedUsers.length === 0) return alert("SYSTEM ERROR: SELECT INVOLVED SUBJECTS.");
+
+            // MERGE CATEGORY AND DESCRIPTION FOR BACKEND COMPATIBILITY
+            const category = document.getElementById('expenseCategory').value;
+            const rawDesc = document.getElementById('expenseDesc').value.trim();
+            const finalDesc = `[${category}] ${rawDesc}`;
 
             const expenseData = {
                 id: editingExpenseId || 'EXP_' + Date.now().toString(),
-                desc: document.getElementById('expenseDesc').value,
+                desc: finalDesc,
                 amount: parseFloat(document.getElementById('expenseAmount').value),
                 payer: document.getElementById('expensePayer').value,
                 involvedUsers: involvedUsers
@@ -254,7 +356,7 @@
         });
 
         function deleteExpense(expenseId) {
-            if(!confirm("Are you sure you want to delete this expense?")) return;
+            if(!confirm("CONFIRM DELETION OF TRANSACTION LOG?")) return;
             const trip = getActiveTrip();
             trip.expenses = trip.expenses.filter(e => e.id !== expenseId);
             renderTripDetails();
@@ -265,21 +367,33 @@
             const trip = getActiveTrip(); const exp = trip.expenses.find(e => e.id === expenseId);
             if(!exp) return;
             editingExpenseId = expenseId;
-            document.getElementById('expenseDesc').value = exp.desc;
+            
+            // SPLIT CATEGORY AND DESCRIPTION APART
+            const match = exp.desc.match(/^\[(.*?)\] (.*)$/);
+            if (match) {
+                document.getElementById('expenseCategory').value = match[1];
+                document.getElementById('expenseDesc').value = match[2];
+            } else {
+                document.getElementById('expenseCategory').value = "📦 Misc"; // Fallback for old data
+                document.getElementById('expenseDesc').value = exp.desc;
+            }
+
             document.getElementById('expenseAmount').value = exp.amount;
             document.getElementById('expensePayer').value = exp.payer;
 
             const checkboxes = document.querySelectorAll('input[name="involved"]');
             checkboxes.forEach(cb => { cb.checked = exp.involvedUsers.includes(cb.value); });
 
-            expenseFormTitle.textContent = "Edit Expense"; submitExpenseBtn.textContent = "Update Expense";
+            expenseFormTitle.textContent = "> 02. OVERRIDE_TRANSACTION"; 
+            submitExpenseBtn.textContent = "EXECUTE OVERRIDE";
             cancelEditBtn.style.display = "block";
             window.scrollTo({ top: document.getElementById('expenseFormTitle').offsetTop, behavior: 'smooth' });
         }
 
         function cancelEdit() {
             editingExpenseId = null; expenseForm.reset();
-            expenseFormTitle.textContent = "2. Add Expense"; submitExpenseBtn.textContent = "Record Expense";
+            expenseFormTitle.textContent = "> 02. LOG_TRANSACTION"; 
+            submitExpenseBtn.textContent = "PROCESS TRANSACTION";
             cancelEditBtn.style.display = "none";
             document.querySelectorAll('input[name="involved"]').forEach(cb => cb.checked = true);
         }
@@ -289,21 +403,22 @@
             const trip = getActiveTrip();
             if(!trip || currentSettlements.length === 0) return;
 
-            let text = `✈️ Trip: ${trip.name}\n`;
-            text += `------------------------\n`;
+            let text = `[ TRIPSPLIT_OS REPORT ]\n`;
+            text += `DIR: ${trip.name}\n`;
+            text += `========================\n`;
             currentSettlements.forEach(s => {
-                text += `💸 ${s.from} owes ${s.to} $${s.amount.toFixed(2)}\n`;
+                text += `> ${s.from} TO TRANSFER $${s.amount.toFixed(2)} TO ${s.to}\n`;
             });
-            text += `------------------------\n`;
-            text += `Calculated by TripSplit`;
+            text += `========================\n`;
+            text += `SYSTEM NOMINAL.`;
 
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = copySettlementsBtn.innerText;
-                copySettlementsBtn.innerText = "✅ Copied to Clipboard!";
+                copySettlementsBtn.innerText = "[✅] DATA EXPORTED";
                 setTimeout(() => { copySettlementsBtn.innerText = originalText; }, 2000);
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
-                alert("Clipboard access denied. Please copy manually.");
+                alert("ACCESS DENIED TO CLIPBOARD.");
             });
         }
 
@@ -311,25 +426,31 @@
         function renderTripDetails() {
             const trip = getActiveTrip(); if (!trip) return;
 
-            currentTripTitle.textContent = trip.name;
-            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>Who paid?</option>';
+            currentTripTitle.innerHTML = `> DIR: <span style="color:var(--primary);">${trip.name}</span>`;
+            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>-- SELECT PAYER --</option>';
             involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
             
             // 1. Render Users
             trip.users.forEach(user => {
-                userList.innerHTML += `<li><span>${user}</span><button class="danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser('${user}')">X</button></li>`;
+                userList.innerHTML += `<li><span><span style="color:#555;">ID_</span>${user}</span><button class="danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteUser('${user}')">PURGE</button></li>`;
                 expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
                 involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
             });
 
             // 2. Render Expense Log
-            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em>No expenses yet.</em></li>';
+            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em style="color:#555;">NO LOGS DETECTED.</em></li>';
             trip.expenses.forEach(exp => {
                 const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
+                
+                // Make the category pop slightly if it exists
+                let displayDesc = exp.desc;
+                const match = displayDesc.match(/^\[(.*?)\] (.*)$/);
+                if (match) { displayDesc = `<span style="color:var(--primary); font-size: 12px;">[${match[1]}]</span><br>${match[2]}`; }
+
                 expenseLogList.innerHTML += `
-                    <li>
-                        <div><strong>${exp.desc}</strong> - $${exp.amount.toFixed(2)}<br><small>Paid by ${exp.payer} (Split by ${involvedCount})</small></div>
-                        <div><button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button><button class="danger" onclick="deleteExpense('${exp.id}')">X</button></div>
+                    <li style="align-items: flex-start;">
+                        <div><strong style="color:#fff;">${displayDesc}</strong> <br><span style="color:var(--success); font-size: 18px;">$${exp.amount.toFixed(2)}</span><br><small style="color:#888;">CREDITOR: ${exp.payer} (SPLIT: ${involvedCount})</small></div>
+                        <div style="display:flex; flex-direction:column; gap:5px;"><button class="edit-btn" onclick="editExpense('${exp.id}')">EDIT</button><button class="danger" onclick="deleteExpense('${exp.id}')">DEL</button></div>
                     </li>`;
             });
 
@@ -355,7 +476,7 @@
             debtors.sort((a, b) => b.amount - a.amount);
             creditors.sort((a, b) => b.amount - a.amount);
 
-            currentSettlements = []; // Reset global settlements array for clipboard
+            currentSettlements = []; 
             let i = 0; let j = 0;
 
             while (i < debtors.length && j < creditors.length) {
@@ -371,18 +492,18 @@
 
             // 5. Render Settlements to UI
             settlementList.innerHTML = '';
-            copySettlementsBtn.style.display = 'none'; // Hide by default
+            copySettlementsBtn.style.display = 'none';
 
             if (currentSettlements.length === 0) {
-                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em>Everyone is fully settled up!</em></li>';
-                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em>No expenses yet.</em></li>';
+                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em style="color:var(--success);">STATUS: ALL ACCOUNTS SETTLED.</em></li>';
+                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em style="color:#555;">STATUS: AWAITING TRANSACTION DATA.</em></li>';
             } else {
                 currentSettlements.forEach(s => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<span><strong>${s.from}</strong> owes <strong>${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
+                    li.innerHTML = `<span><strong style="color:var(--danger);">${s.from}</strong> <span style="color:#888;">→</span> <strong style="color:var(--success);">${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
                     settlementList.appendChild(li);
                 });
-                copySettlementsBtn.style.display = 'block'; // Show if there are debts
+                copySettlementsBtn.style.display = 'block'; 
             }
         }
 
