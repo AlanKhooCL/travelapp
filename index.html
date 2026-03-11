@@ -444,3 +444,90 @@
 
         // --- RENDER UI & CALCULATE DEBTS ---
         function renderTripDetails() {
+            const trip = getActiveTrip(); if (!trip) return;
+
+            currentTripTitle.textContent = `${trip.name}`;
+            userList.innerHTML = ''; expensePayerSelect.innerHTML = '<option value="" disabled selected>-- Who paid? --</option>';
+            involvedUsersContainer.innerHTML = ''; expenseLogList.innerHTML = '';
+            
+            // 1. Render Users
+            trip.users.forEach(user => {
+                userList.innerHTML += `<li><span style="font-weight: 600;">👤 ${user}</span><button class="danger" onclick="deleteUser('${user}')">X</button></li>`;
+                expensePayerSelect.innerHTML += `<option value="${user}">${user}</option>`;
+                involvedUsersContainer.innerHTML += `<label><input type="checkbox" name="involved" value="${user}" checked> ${user}</label>`;
+            });
+
+            // 2. Render Expense Log
+            if (trip.expenses.length === 0) expenseLogList.innerHTML = '<li><em style="color:var(--text-muted);">No expenses yet. Let\'s spend some money!</em></li>';
+            trip.expenses.forEach(exp => {
+                const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
+                
+                let displayDesc = exp.desc;
+                const match = displayDesc.match(/^\[(.*?)\] (.*)$/);
+                if (match) { displayDesc = `<span style="color:var(--primary); font-size: 0.85em; font-weight: 600;">${match[1]}</span><br><span style="font-size: 1.1em; color:var(--text-dark);">${match[2]}</span>`; }
+
+                expenseLogList.innerHTML += `
+                    <li style="align-items: flex-start;">
+                        <div><strong>${displayDesc}</strong> <br><span style="color:var(--success); font-weight: 700; font-size: 1.2em;">$${exp.amount.toFixed(2)}</span><br><small style="color:var(--text-muted); font-weight: 500;">Paid by ${exp.payer} (Split by ${involvedCount})</small></div>
+                        <div style="display:flex; flex-direction:column; gap:8px;"><button class="edit-btn" onclick="editExpense('${exp.id}')">Edit</button><button class="danger" onclick="deleteExpense('${exp.id}')">Delete</button></div>
+                    </li>`;
+            });
+
+            // 3. Calculate Net Balances
+            let balances = {};
+            trip.users.forEach(u => balances[u] = 0);
+
+            trip.expenses.forEach(exp => {
+                const involved = exp.involvedUsers || trip.users; 
+                if(involved.length === 0) return;
+                const split = exp.amount / involved.length;
+                balances[exp.payer] += exp.amount;
+                involved.forEach(u => balances[u] -= split);
+            });
+
+            // 4. DEBT SIMPLIFICATION ALGORITHM
+            let debtors = []; let creditors = [];
+            for (const [user, balance] of Object.entries(balances)) {
+                if (balance < -0.01) debtors.push({ user, amount: Math.abs(balance) });
+                else if (balance > 0.01) creditors.push({ user, amount: balance });
+            }
+
+            debtors.sort((a, b) => b.amount - a.amount);
+            creditors.sort((a, b) => b.amount - a.amount);
+
+            currentSettlements = []; 
+            let i = 0; let j = 0;
+
+            while (i < debtors.length && j < creditors.length) {
+                let debtor = debtors[i]; let creditor = creditors[j];
+                let minAmount = Math.min(debtor.amount, creditor.amount);
+                
+                currentSettlements.push({ from: debtor.user, to: creditor.user, amount: minAmount });
+
+                debtor.amount -= minAmount; creditor.amount -= minAmount;
+                if (Math.abs(debtor.amount) < 0.01) i++;
+                if (Math.abs(creditor.amount) < 0.01) j++;
+            }
+
+            // 5. Render Settlements to UI
+            settlementList.innerHTML = '';
+            copySettlementsBtn.style.display = 'none';
+
+            if (currentSettlements.length === 0) {
+                if (trip.expenses.length > 0) settlementList.innerHTML = '<li><em style="color:var(--success); font-weight: 600;">Everyone is fully settled up! 🎉</em></li>';
+                else if (trip.users.length > 0) settlementList.innerHTML = '<li><em style="color:var(--text-muted);">No debts yet.</em></li>';
+            } else {
+                currentSettlements.forEach(s => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span><strong style="color:var(--danger);">${s.from}</strong> owes <strong style="color:var(--success);">${s.to}</strong></span> <span class="settlement-amount">$${s.amount.toFixed(2)}</span>`;
+                    settlementList.appendChild(li);
+                });
+                copySettlementsBtn.style.display = 'block'; 
+            }
+        }
+
+        // --- INIT ---
+        loadDataFromGoogle();
+    </script>
+</body>
+</html>
