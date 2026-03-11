@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TripSplit | Road Trip</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#E17055">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3284/3284614.png">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
 
@@ -31,6 +36,8 @@
             max-width: 600px; 
             margin: 0 auto; 
             padding: 20px; 
+            /* Added safe area padding for modern iPhones when installed as PWA */
+            padding-bottom: env(safe-area-inset-bottom, 20px);
         }
 
         h1 { 
@@ -94,6 +101,7 @@
             width: 100%;
             transition: transform 0.1s, background-color 0.2s;
             box-shadow: 0 4px 10px rgba(225, 112, 85, 0.3);
+            -webkit-tap-highlight-color: transparent; /* Removes blue flash on mobile */
         }
 
         button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
@@ -210,6 +218,15 @@
     </div>
 
     <script>
+        // --- PWA SERVICE WORKER REGISTRATION ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered!', reg))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+
         // --- STATE & CONFIG ---
         const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbyXf27SbBGAib7DnywSkf7bh_ZIn_-Q-66O-mjV1SHJSC_UebMtyHbB_NccAq9yAZKT/exec";
         
@@ -280,7 +297,6 @@
 
         document.getElementById('newTripForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            // Capitalize first letters nicely
             const rawName = document.getElementById('tripName').value.trim();
             const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
             
@@ -306,7 +322,7 @@
         document.getElementById('addUserForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const rawName = document.getElementById('userName').value.trim();
-            const name = rawName.charAt(0).toUpperCase() + rawName.slice(1); // Capitalize
+            const name = rawName.charAt(0).toUpperCase() + rawName.slice(1);
             
             const trip = getActiveTrip();
             if (name && !trip.users.includes(name)) { 
@@ -338,7 +354,6 @@
             const involvedUsers = Array.from(checkboxes).map(cb => cb.value);
             if(involvedUsers.length === 0) return alert("Select at least one person who is chipping in!");
 
-            // MERGE CATEGORY AND DESCRIPTION
             const category = document.getElementById('expenseCategory').value;
             const rawDesc = document.getElementById('expenseDesc').value.trim();
             const finalDesc = `[${category}] ${rawDesc}`;
@@ -375,13 +390,12 @@
             if(!exp) return;
             editingExpenseId = expenseId;
             
-            // SPLIT CATEGORY AND DESCRIPTION APART
             const match = exp.desc.match(/^\[(.*?)\] (.*)$/);
             if (match) {
                 document.getElementById('expenseCategory').value = match[1];
                 document.getElementById('expenseDesc').value = match[2];
             } else {
-                document.getElementById('expenseCategory').value = "📦 Other"; // Fallback
+                document.getElementById('expenseCategory').value = "📦 Other";
                 document.getElementById('expenseDesc').value = exp.desc;
             }
 
@@ -448,7 +462,6 @@
             trip.expenses.forEach(exp => {
                 const involvedCount = exp.involvedUsers ? exp.involvedUsers.length : trip.users.length;
                 
-                // Format the category display
                 let displayDesc = exp.desc;
                 const match = displayDesc.match(/^\[(.*?)\] (.*)$/);
                 if (match) { displayDesc = `<span style="color:var(--primary); font-size: 0.85em; font-weight: 600;">${match[1]}</span><br><span style="font-size: 1.1em; color:var(--text-dark);">${match[2]}</span>`; }
