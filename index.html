@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TripSplit | Road Trip</title>
+    <title>TripSplit | Holiday</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#E17055">
+    <meta name="theme-color" content="#3498db">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3284/3284614.png">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
 
         :root {
-            /* Sunset Palette */
-            --bg-top: #FF7E5F;
-            --bg-bottom: #FEB47B;
-            --card-bg: rgba(255, 255, 255, 0.92);
-            --text-dark: #2D3436;
-            --text-muted: #636E72;
-            --primary: #E17055; /* Warm terracotta */
-            --primary-hover: #D63031;
-            --secondary: #FFEAA7; /* Soft sun yellow */
-            --border: #DFE6E9;
-            --danger: #FF7675;
-            --success: #00B894;
+            /* Blue Holiday Palette */
+            --bg-top: #1e3c72;
+            --bg-bottom: #2a5298;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --primary: #2980b9; 
+            --primary-hover: #3498db;
+            --secondary: #dff9fb; 
+            --border: #bdc3c7;
+            --danger: #e74c3c;
+            --success: #00b894;
             --font: 'Outfit', sans-serif;
         }
 
@@ -36,15 +36,36 @@
             max-width: 600px; 
             margin: 0 auto; 
             padding: 20px; 
-            /* Added safe area padding for modern iPhones when installed as PWA */
             padding-bottom: env(safe-area-inset-bottom, 20px);
+            overflow-x: hidden; /* Prevents scrollbar from falling money */
         }
+
+        /* --- Falling Money Effect --- */
+        .money-flake {
+            position: fixed;
+            top: -10%;
+            z-index: 9999;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear infinite, sway ease-in-out infinite alternate;
+        }
+
+        @keyframes fall {
+            0% { top: -10%; }
+            100% { top: 110%; }
+        }
+
+        @keyframes sway {
+            0% { transform: translateX(0px) rotate(0deg); }
+            100% { transform: translateX(25px) rotate(45deg); }
+        }
+        /* --------------------------- */
 
         h1 { 
             text-align: center; 
             font-weight: 700; 
             color: white;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            text-shadow: 0 4px 10px rgba(0,0,0,0.25);
             margin-bottom: 30px;
             font-size: 2.5em;
         }
@@ -64,8 +85,10 @@
             border-radius: 20px;
             padding: 25px; 
             margin-bottom: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
             backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 10;
         }
 
         input[type="text"], input[type="number"], select { 
@@ -85,7 +108,7 @@
 
         input:focus, select:focus { 
             border-color: var(--primary); 
-            box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2); 
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); 
         }
 
         button { 
@@ -100,8 +123,8 @@
             padding: 14px;
             width: 100%;
             transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 4px 10px rgba(225, 112, 85, 0.3);
-            -webkit-tap-highlight-color: transparent; /* Removes blue flash on mobile */
+            box-shadow: 0 4px 10px rgba(41, 128, 185, 0.3);
+            -webkit-tap-highlight-color: transparent;
         }
 
         button:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
@@ -113,8 +136,8 @@
         button.danger { background-color: transparent; color: var(--danger); border: 2px solid var(--danger); box-shadow: none; width: auto; padding: 6px 12px; margin-left: 5px; font-size: 0.9em;}
         button.danger:hover { background-color: var(--danger); color: white; }
         
-        button.edit-btn { background-color: #FDCB6E; color: var(--text-dark); box-shadow: none; width: auto; padding: 8px 14px; font-size: 0.9em; border-radius: 8px;}
-        button.edit-btn:hover { background-color: #E1B12C; }
+        button.edit-btn { background-color: #74b9ff; color: #fff; box-shadow: none; width: auto; padding: 8px 14px; font-size: 0.9em; border-radius: 8px;}
+        button.edit-btn:hover { background-color: #0984e3; }
 
         #copySettlementsBtn { background-color: var(--success); box-shadow: 0 4px 10px rgba(0, 184, 148, 0.3); }
         #copySettlementsBtn:hover { background-color: #00A885; }
@@ -128,10 +151,10 @@
         
         .settlement-amount { font-weight: 700; color: var(--text-dark); background: var(--secondary); padding: 6px 12px; border-radius: 20px;}
         
-        .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .trip-header-actions { display: flex; justify-content: space-between; margin-bottom: 20px; position: relative; z-index: 10; }
         .trip-header-actions button { margin-bottom: 0; }
 
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 20px 0; padding: 15px; background: #fff; border-radius: 12px; border: 1px solid var(--border); }
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0 20px 0; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 1px solid var(--border); }
         .checkbox-group label { display: flex; align-items: center; cursor: pointer; color: var(--text-dark); font-weight: 500;}
         .checkbox-group input { width: auto; margin: 0 10px 0 0; accent-color: var(--primary); transform: scale(1.2); }
         
@@ -144,14 +167,14 @@
 </head>
 <body>
 
-    <h1>🚐 TripSplit</h1>
+    <h1>✈️ TripSplit ❄️</h1>
 
     <div id="dashboardView" class="view active-view">
         <div class="card">
             <h2>Start a New Journey</h2>
             <form id="newTripForm">
-                <input type="text" id="tripName" placeholder="Where to? (e.g., West Coast '26)" required autocomplete="off">
-                <button type="submit">Hit the Road 🗺️</button>
+                <input type="text" id="tripName" placeholder="Where to? (e.g., Winter Getaway '26)" required autocomplete="off">
+                <button type="submit">Let's Go 🌍</button>
             </form>
         </div>
         
@@ -166,7 +189,7 @@
             <button class="danger" onclick="deleteTrip()">Delete Trip 🗑️</button>
         </div>
         
-        <div class="card" style="background: var(--primary); color: white;">
+        <div class="card" style="background: var(--primary); color: white; border-bottom: 4px solid var(--secondary);">
             <h2 id="currentTripTitle" style="margin-top: 0; border: none; color: white; text-align: center; font-size: 1.8em;"></h2>
         </div>
 
@@ -185,15 +208,15 @@
                 
                 <select id="expenseCategory" required>
                     <option value="" disabled selected>-- Choose Category --</option>
-                    <option value="⛽ Gas & Transport">⛽ Gas & Transport</option>
-                    <option value="🏕️ Accommodation">🏕️ Accommodation</option>
-                    <option value="🍔 Food & Drinks">🍔 Food & Drinks</option>
+                    <option value="✈️ Transport">✈️ Transport</option>
+                    <option value="🏨 Accommodation">🏨 Accommodation</option>
+                    <option value="🍽️ Food & Drinks">🍽️ Food & Drinks</option>
                     <option value="🎟️ Fun Stuff">🎟️ Fun Stuff</option>
-                    <option value="🛒 Snacks/Groceries">🛒 Snacks/Groceries</option>
+                    <option value="🛒 Shopping">🛒 Shopping</option>
                     <option value="📦 Other">📦 Other</option>
                 </select>
 
-                <input type="text" id="expenseDesc" placeholder="What was it for? (e.g., In-N-Out)" required autocomplete="off">
+                <input type="text" id="expenseDesc" placeholder="What was it for?" required autocomplete="off">
                 <input type="number" id="expenseAmount" placeholder="Amount ($)" step="0.01" required>
                 <select id="expensePayer" required></select>
                 
@@ -218,6 +241,40 @@
     </div>
 
     <script>
+        // --- FALLING MONEY SAKURA EFFECT ---
+        function createMoney() {
+            const money = document.createElement('div');
+            money.classList.add('money-flake');
+            
+            // Randomly select between cash, card, and coins
+            const symbols = ['💸', '💵', '💳', '💰', '🪙'];
+            money.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            // Random horizontal starting position
+            money.style.left = Math.random() * 100 + 'vw';
+            
+            // Random size variation
+            money.style.fontSize = (Math.random() * 1.5 + 1) + 'em';
+            
+            // Random fall duration (speed) and sway duration
+            const fallDuration = Math.random() * 4 + 5; // 5 to 9 seconds
+            const swayDuration = Math.random() * 2 + 2; // 2 to 4 seconds
+            money.style.animationDuration = `${fallDuration}s, ${swayDuration}s`;
+            
+            // Random opacity for depth
+            money.style.opacity = Math.random() * 0.6 + 0.4;
+            
+            document.body.appendChild(money);
+            
+            // Clean up the DOM after it falls out of view
+            setTimeout(() => {
+                money.remove();
+            }, fallDuration * 1000);
+        }
+
+        // Drop money every 350ms (adjust this for more/less density)
+        setInterval(createMoney, 350);
+
         // --- PWA SERVICE WORKER REGISTRATION ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -424,13 +481,13 @@
             const trip = getActiveTrip();
             if(!trip || currentSettlements.length === 0) return;
 
-            let text = `🌅 TripSplit: ${trip.name} 🌅\n`;
+            let text = `❄️ TripSplit: ${trip.name} ❄️\n`;
             text += `------------------------\n`;
             currentSettlements.forEach(s => {
                 text += `💸 ${s.from} owes ${s.to} $${s.amount.toFixed(2)}\n`;
             });
             text += `------------------------\n`;
-            text += `Thanks for a great trip! 🚐✨`;
+            text += `Thanks for a great trip! ✈️✨`;
 
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = copySettlementsBtn.innerText;
