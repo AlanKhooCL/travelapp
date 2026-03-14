@@ -1,27 +1,29 @@
-# East Asia Spring Escape - Travel Planner
+# Travel Expense Tracker
 
-An interactive travel itinerary planner for an East Asia trip covering Tokyo, Jeju Island, and Seoul.
+A lightweight, mobile-friendly Progressive Web App (PWA) designed to track and split travel expenses. Built with vanilla web technologies, this application uses Google Sheets as a seamless, serverless backend for data storage and collaboration.
 
-## Features
+## 🚀 Features
 
-- **Day-by-day itinerary** with timeline view, filterable by location
-- **Expense tracking** per itinerary item with running totals per day, per location, and overall trip
-- **Interactive maps** per day using Leaflet.js with numbered location pins and route visualization
-- **Cherry blossom** falling animation for the spring theme
-- **Responsive design** built with Tailwind CSS
-- **Persistent expenses** saved to localStorage
+* **Expense Tracking & Splitting:** Easily log shared travel costs and calculate splits on the go.
+* **Google Sheets Integration:** Syncs data directly to a connected Google Sheet for real-time updates and easy data management.
+* **Progressive Web App (PWA):** Installable on mobile and desktop devices for a native app-like experience.
+* **Responsive Design:** Built to work beautifully across all screen sizes.
 
-## How to Use
+## 🛠️ Tech Stack
 
-1. Open `index.html` in any modern browser
-2. Use the filter tabs to view the full itinerary or filter by city (Tokyo, Jeju, Seoul)
-3. Click the **Map** button on any day card to see an interactive map with all stops plotted
-4. Edit the **$** expense field next to any event to track your spending -- totals update live
-5. Expenses are automatically saved to your browser's localStorage
+* **Frontend:** HTML5, CSS3, Vanilla JavaScript
+* **Backend/Database:** Google Sheets (via Google Apps Script / API)
+* **Architecture:** Progressive Web App (PWA)
 
-## Tech Stack
+## 📦 Getting Started
 
-- HTML5 + inline JavaScript (single-file app, no build step)
-- [Tailwind CSS](https://tailwindcss.com/) via CDN
-- [Lucide Icons](https://lucide.dev/) for UI icons
-- [Leaflet.js](https://leafletjs.com/) + OpenStreetMap for interactive maps
+### Prerequisites
+* A web browser.
+* A Google account to host the backend spreadsheet.
+
+### Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/yourusername/travel-expense-tracker.git](https://github.com/yourusername/travel-expense-tracker.git)
+   cd travel-expense-tracker
